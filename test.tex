@@ -1,0 +1,2781 @@
+\documentclass[12pt]{article}
+
+%\input{"C:/Users/flores/Documents/Notes/packages.tex"}
+\input{"/home/henrique/Dropbox/Notes/packages.tex"}
+
+\usepackage{amssymb}
+
+\title{Notes on Probability Theory}
+\author{Henrique Flores \\ M.Safra \& Co.}
+\date{}
+
+% Overcounting
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{Definitions}
+There is a set $\Omega$ called sample space.
+Every subset inside $\Omega$ is called an event and probabilities are
+functions $p$ of events to the real interval $[0, 1]$, that is, $p: A \subset \Omega \to [0,1]$.
+The axioms of probability theory can be summarized as follows:
+
+\begin{itemize}
+\item $P(\Omega) = 1$ and $P(\emptyset) = 0$, where $\emptyset$ is the empty set.
+\item $P \left( \cup_{n = 1}^{\infty} A_{n} \right) = \sum_{n = 1}^{\infty} P(A_{n})$ if
+and only if $A_{i}$ are mutually disjoint for $i = 1, \ldots, n$.
+\end{itemize}
+
+\noindent
+Every probability rule can be derived from these two axioms and set operations.
+Let us prove $P(A) = 1 - P(A^{c})$ where $A^{c}$ is the complement of $A$.
+It follows immediatelly from the considerations that $ A \cup A^{c} = \Omega$ in such a way that
+$A$ and $A^{c}$ are disjoint, and that $P(\Omega) = 1$.
+We do not intend to prove every formula written in this text; 
+only those which do not appear intuitive or represent a good exercise.
+
+For $A$ and $B$ inside $\Omega$ not necessarily disjoint, it is true that 
+
+\begin{equation}
+p(A \cup B) = p(A) + p(B) - p(A \cap B),
+\end{equation}
+
+\noindent
+which states that probabilities are linear; the last term
+discounts the contribution of one intersection so there is no overcounting. 
+This is the particular case of the more general \textit{inclusion and exclusion}
+principle.
+
+For intersections, we define the quantity $P(A | B)$ by
+
+\begin{equation} \label{intersection1}
+p(A \cap B) = p( A | B ) p( B ),
+\end{equation}
+
+\noindent
+to be read as: \textit{the probability of $A$ given that $B$},
+or the probability of event $A$ given that we event $B$ has already happened.
+On intersections, we are conditioning the probability of one event to the other,
+because that is precisely what it means to intersect. The probability of $A$ given $B$
+is modulated by the probability of $B$ happening.
+Since there is no particular reason that $A$ and $B$ on their intersection should be distinguishable,
+we can also write
+
+\begin{equation} \label{intersection2}
+p(A \cap B) = p( B | A ) p (A).
+\end{equation}
+
+\noindent
+Consistency of (\ref{intersection1}) and (\ref{intersection2}) gives us 
+Bayes rule:
+
+\begin{equation}
+p( A | B ) p (B) = 
+p( B | A ) p (A)
+\end{equation}
+
+Of extreme importance for probability theory is the law of marginalization,
+
+\begin{equation}
+P(A) = \sum_{B} P(A | B) P(B),
+\end{equation}
+
+\noindent
+where $B$ form a disjoint partition of $\Omega$.
+Let us prove this relation.
+Consider a disjoint partition of $\Omega$, that is, a collection of disjoint
+subsets $B_{i}$ such that $ \bigcup_{i = 1}^{N} B_{i} = \Omega$.
+Whether or not is possible to find such partitions is a consideration of 
+\textit{topology}, which is beyond the scope of these notes.
+We will work under the assumption that such partitions always exist. 
+Given such partition, it follows:
+
+\begin{equation}
+A \cap \left( \bigcup_{i = 1}^{N} B_{i} \right) = \bigcup_{i = 1}^{N} \left( A \cap B_{i} \right).
+\end{equation}
+
+\noindent
+Therefore
+
+\begin{align}
+P(A) &= P(A \cap \Omega)
+\nonumber \\
+\nonumber \\
+&= P \left( A \cap \bigcup_{i = 1}^{N} B_{i} \right) 
+= P \left( \bigcup_{i=1}^{N}  A \cap B_{i} \right) 
+\nonumber \\
+\nonumber \\
+&= \sum_{i = 1}^{N} P \left( A \cap B_{i} \right) 
+\nonumber \\
+\nonumber \\
+&= \sum_{i = 1}^{N} P \left( A | B_{i} \right) P(B_{i})
+\end{align}
+
+\noindent
+where we have used the fact that the intersections $A \cap B_{i}$ are disjoint
+for each $i$ given that $B_{i}$ are disjoint.
+\paragraph{Monty Hall problem.}
+Let us understand Bayes rule solving the Monty Hall problem.
+There are $3$ doors: two of them contain garbage but one contains a special prize.
+You have to choose one.
+Given your choice, a door that contains garbage and it is not the one you have choosen is revealed to you.
+There are only two doors now and you are given the chance to change the door you picked. Do you switch?
+
+\paragraph{Answer.}
+Let $H$ represent the prize location: $H = 1$ means that the prize is inside door $1$, \textit{etc}.
+
+At the beginning every door is equally likely, so the prior probability is
+
+\begin{equation}
+p(H = 1) = p (H = 2) = p (H = 3 ) = 1/3.
+\end{equation}
+
+Let us choose door $3$, and it is revealed that door $1$ is garbage.
+Now we have to compute $p ( H = 3 | D = 1 )$, that is,
+what is the probability that the prize is on door $3$ given that we know 
+door $1$ is gargage.
+We will solve this applying Bayes rule:
+
+\begin{equation}
+p ( H = 3 | D = 1 ) = \frac{ p ( D = 1 | H = 3 ) p ( H = 3 ) }{ p ( D = 1 ) }.
+\end{equation}
+
+In order to compute the probability that the door opened is $1$ given that the prize is on door $3$ we
+use the following table:
+
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+\hline
+& D = 1 & D = 2 & D = 3 \\
+\hline
+H = 1 & 0 & 1 & 0 \\
+\hline 
+H = 2 & 1 & 0 & 0 \\
+\hline
+H = 3 & 1/2 & 1/2 & 0 \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent
+Notice that the column $D = 3$ is entirely zero because this door can never be opened since it contains the prize.
+The probabilities are then
+
+\begin{equation}
+p ( H = 3 | D = 1 ) =  1/3 * 1/2 * 2 = 1/3
+\end{equation}
+
+\noindent
+together with
+
+\begin{equation}
+p ( H = 1 | D = 1 ) = 0
+\end{equation}
+
+\noindent
+and
+
+\begin{equation}
+p ( H = 2 | D = 1 ) = 2/3
+\end{equation}
+
+\noindent
+So, the probability that the prize is really behind door number $3$ given that the 
+door $1$ is open is really just $1/3$.
+We are better off switching doors.
+
+I want to make two small comments.
+The first comment is that the problem is symmetric. 
+If we had choosen instead of door $3$ door number $2$,
+the probabilities would have not changed.
+What changes is the conditional table:
+
+\begin{center}
+\begin{tabular}{| c | c | c | c |}
+\hline
+& D = 1 & D = 2 & D = 3 \\
+\hline
+H = 1 & 0 & 0 & 1 \\
+\hline 
+H = 2 & 1/2 & 0 & 1/2 \\
+\hline
+H = 3 & 1 & 0 & 0 \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent
+Combining everything, we arrive at
+
+\begin{equation}
+p( H = 3 | D = 1 ) = 1 * 1/3 * 2 = 2/3
+\end{equation}
+
+\noindent
+together with
+
+\begin{equation}
+p ( H = 1 | D = 1 ) = 0
+\end{equation}
+
+\noindent
+and 
+
+\begin{equation}
+p ( H = 2 | D = 1 ) = 1/3.
+\end{equation}
+
+\noindent
+And again we are better off switching.
+
+The last comment is about the probability that door $1$ is opened in either scenario. 
+I do not have an intuitive explanation for the value of $1/2$.
+But this value has been computed with the law of marginalization:
+
+\begin{equation}
+p(D = 1) = \sum_{H = 1}^{3}  p(D = 1 | H ) p(H)
+\end{equation}
+
+\vspace{.5cm}
+Another important example of Bayes theorem is the 
+probability of having a rare disease.
+
+\paragraph{Probability of having a disease.}
+You suspect that you have a very rare disease which occurs with a frequency of $0.001$ in the population.
+After performing a test with $99\%$ of confidence that results positive, what is the probability that 
+you actually have the disease?
+
+\paragraph{Answer.}
+We wish to compute $p( H = \mathrm{True} | E = \mathrm{True} )$, which is read as
+the probability that the hypothesis $H$ of having the disease is true when the event $E$ is also positive.
+
+Via Bayes theorem 
+
+\begin{equation}
+p ( H = \mathrm{True} | E = \mathrm{True} ) = \frac{ p( E = \mathrm{True} | H = \mathrm{True} ) p ( H = \mathrm{True} ) } { p ( E = \mathrm{True} ) }
+\end{equation}
+
+\noindent
+the probability that we are interested in depends on the probability that the test returns positive given that it is true
+that we have the disease, which is the degree of accuracy of the test: $99\%$, and on the probability of having the disease 
+in the first place, for which the frequency in population is the best estimate.
+For the probability of the test returning positive, we use the law of marginalization:
+
+\begin{equation}
+p( E = \mathrm{True} ) = \sum p ( E = \mathrm{True} | H ) p (H).
+\end{equation}
+
+Plugging in the numbers, we obtain:
+
+\begin{equation}
+p ( H = \mathrm{True} | E = \mathrm{True} ) = 
+\frac{ 0.99 \times 0.001 }{ 0.99 \times 0.001 + 0.01 \times 0.999 } = 9 \% .
+\end{equation}
+
+\noindent
+At first glance, $9\%$ seems so small, how could this be?
+The point is that the frequency in the population is so small that for every $1000$ people
+that are tested we have 10 false positives for 1 occurence of the disease.
+This means that false positives are more frequent than being sick, and so our probability of 
+having the disease after testing positive is actually small.
+
+If we run the test a second time 
+
+\begin{equation}
+p ( H = \mathrm{True} | E = \mathrm{True} ) = 
+\frac{ 0.99 \times 0.09 }{ 0.99 \times 0.09 + 0.01 \times 0.91 } = 91 \% 
+\end{equation}
+
+\noindent
+where we have now updated our belief that we actually have the disease for the calculated $9 \%$.
+
+This number now seems more likely. But interestingly enough, they are still not as high as the 
+test confidence.
+
+\section{Counting.}
+
+Several problems in probability can be solved by counting.
+Counting methods apply to experiments with a finite number of outcomes.
+This section revises the basic intuition behind the counting formulas.
+
+Let us build our intuition going to increasingly complicated examples.
+Consider a list of $26$ different elements: $\{ 1, \ldots, 26 \}$.
+Let us begin calculating how many sequences of 3 elements can we form if we allow repetitions?
+Well, for each place in the sequence, we can choose any number between $1$ and $26$, giving a total
+of $26$ possibilities for each slot. Therefore we have $26 \times 26 \times 26$ different possibilites.
+What if we do not allow repetitions to take place? Then once a given element is picked, it cannot be picked
+again, so out of $26$ possibilities in the first slot, we will have $25$ for the second since one element was 
+already choosen. In total, we obtain $26 \times 25 \times 24$ combinations that do not have repetitions.
+Notice that the difference of $26^{3}$ and $26 \times 25 \times 24$ gives $1976$, which is the number of sequences
+that have at least one repeated element.
+
+The number of sequences that have at least one repeated element can be counted in a different way.
+Consider that once we have filled the first spot, the second spot is known leaving the third one free. We have then $26 \times 25$ possibilities.
+But we could have filled the first spot and the third spot leaving the second spot free, giving again $26 \times 25$ different possibilites.
+Finally, we could fill the second and third spots with the same element, leaving the first one free to vary over the $26$ possibilites.
+In total, if we have one repetition, there are $3 \times 26 \times 25$ possibilites.
+If we have two repetitions, then we only have $26$ possibilities since fixing one spot, fixes all remaining two.
+Therefore, the number of sequences that have at least one repeated element is given by $3 \times 26 \times 25 + 26 = 1976$.
+
+\subsection{Permutations.}
+
+Let us now generalize a bit by considering a list of $n$ elements: $\{ 1, \ldots, n \}$.
+We wish to answer the following question: How many sequences without repetition can we form?
+Let us name a given sequence with no repeated elements a permutation of the sequence $\{1, \ldots, n \}$.
+For example, two possible permutations are: $(1, 3, 2, \ldots, n )$ and $(1, 2, 3, \ldots, n, n - 1)$.
+Then, considering the counting without repetition, the number of permutations is 
+$n \times (n - 1) \times (n - 2) \times \ldots \times 1$ and we denote this by $n!$:
+
+\begin{equation}
+n! = n \times (n - 1) \times (n - 2) \times \ldots \times 1
+\end{equation}
+
+\subsection{Number of subsets.}
+
+Given a set with $n$ elements, what is the number of all possible subsets?
+That is, given the sequence $\{1, \ldots, n\}$ we have to choose if we select or not
+$1$, if we select or not $2$, \textit{etc}.
+Therefore we have for each element, a binary choice of whether we put it or not the element inside the subset.
+This gives
+
+\begin{equation}
+\# \mbox{ of subsets } =
+2^{n}
+\end{equation}
+
+\paragraph{Example.}
+We roll six, six-sided, dies; what is the probability that all six give different numbers?
+It is intuitive that each die is independent of each other, so we can consider that we have 
+$6^{6}$ possible configurations. 
+The outcomes in which all dies land on different sides is given by 
+$6!$, and finally our answer is $ 6! / 6^{6}$.
+
+\vspace{.5cm}
+Up to now probability is computed using the number of configurations that we are interested in divided
+by the total number of possible configurations that the problem can have. 
+This procedure assumes that all possible events are equally likely.
+Moreover, if we wish equally likely events, then the frequency of each possible configuration is 
+counted as if every possible element in the problem is distinguishable.
+For example, if we again consider the $6$ dices and ask how many configurations have at least one dice with $1$
+facing up, we pretend that we can distinguish among the $6$ dices for couting purposes, even though
+when we look at the dices on the table, it would be impossible to tell.
+We fix one dice to be $1$ and the other $5$ can have any of the $5$ possible configurations.
+Therefore, we have the location of the $1$-dice and the configuration of each of the remaining
+ones, giving in total, $6 \times 5^{5}$ possibilities.
+
+\subsection{Combination.}
+Out of our set of $n$ elements, we wish to pick $k$ of them. 
+For example, in the set $\{1, 2, 3\}$, if we wish to choose $2$ elements. All possible choices
+are given by $\{ (1 , 2), (1 , 3), (2, 3) \}$. Notice that we consider equivalent permutations of the pair, 
+that is, $(1, 2) \approx (2, 1)$.
+The solution to this problem can be obtained as follows. Since $k \leq n$ than let us write all possible
+permutations of $n$ elements and then pick the first $k$ elements that appear.
+We \textbf{are not interested} in the order in which we pick the $k$ elements, so we have to discount
+the permutations of $k$. This gives $n! / k!$, but the same elements can be picked by us if the permutation
+only shuffles the remaning $(n - k)$ elements. Therefore this number must also be discounted.
+Finally, let us denote ${n \choose k}$ -- to be read \textit{$n$ choose $k$} -- the number of
+combinations in which we can choose $k$ elements out of $n$:
+
+\begin{equation}
+{n \choose k} = \frac{n!}{k! (n - k)!}.
+\end{equation}
+
+This result can be easily generalized for the case where we consider the different ways we pick $k$ elements:
+just remove the $k!$ from the denominator.
+
+\paragraph{Example.}
+Consider independent coin tosses where $p(H) = p$. What is the probability that out of $n$ tosses
+we obtain $k$ heads $H$.
+
+Well, each particular configuration of heads and tails has the probability $P$ given by
+
+\begin{equation}
+P = p^{\# \, \mbox{ of heads}} ( 1 - p)^{\# \, \mbox{of tails}} = p^{k} (1 - p)^{n - k}.
+\end{equation}
+
+\noindent
+In the last line we have substituted the number of heads and tails given in the problem.
+The final point is that out of $10$ tosses, we could have obtained $5$ heads in the first five
+tosses or in the last five tosses. Each of these configurations has probability given by $P$, but
+there are ${n \choose k}$ different ways that this specific configuration of $k$ heads in $n$ tosses
+can happen.
+Thus, the probability of obtaining $k$ heads out of $n$ tosses is given by
+
+\begin{equation}
+p( k | n ) = {n \choose k} p^{k} ( 1 - p )^{n - k}
+\end{equation}
+
+It is interesting to ask what happens if we add the probability of having one heads with the probability of having two heads and so on.
+Intuitively, we expect to get $1$ since we are adding over the probabilities of all combinations of heads appearing:
+
+\begin{equation}
+\sum_{k = 0}^{n}  {n \choose k} p^{k} ( 1 - p )^{n - k} = 1.
+\end{equation}
+
+\noindent
+This result is a consequence of the binomial expansion.
+
+\paragraph{Example II.}
+You toss a coin $10$ times and someone tells you that there were $3$ heads.
+What is the probability that the first two tosses gave heads?
+%The probability that we have $3$ heads out of $10$ tosses is given by
+%$p(3 | 10)$. If the first two tosses are heads, there remains only one heads
+%to appear in any of the remaining $8$ positions. The probability that we have
+%one heads in $8$ tosses is $p(1 | 8)$. Therefore our answer is 
+%
+%\begin{equation}
+%p(1 | 8)/ p(3 | 10)
+%\end{equation}
+First, notice that all sequences of $3$ heads in $10$ tosses have the same probability of $p^{3} ( 1 - p)^{7}$.
+We are interested in the number of ways that $3$ heads can appear in $10$ tosses ( ${10 \choose 3}$) and inside 
+that set, what is the number of ways that one heads can be appear in $8$ tosses ( ${8 \choose 1}$ ) since 
+the first two tosses are fixed to be heads.
+Therefore, the probability is given by ${8 \choose 1}  / {10 \choose 3 }$.
+
+\subsection{Partition.}
+Given a set of $n$ elements, we wish to partition it into $k$ subsets of size $n_{1},  n_{2}, \ldots, n_{k}$
+respectively. Again the same strategy used in the derivation of the combination formula can be used here.
+We write a permutation of the set with $n$ elements and start partitioning it discouting the permutations 
+inside the subset.
+The answer is 
+
+\begin{equation}
+\frac{n!}{n_{1} ! n_{2} ! \ldots n_{k}!}
+\end{equation}
+
+\paragraph{Sampling with replacement.}
+Let us sample $k$ times from a set of $n$ items. However in this
+case we allow replacement. How many different picks there is?
+For concreteness consider the specific problem of picking $n = 2$ balls $k$ times. 
+We can go from never picking ball $1$ to picking it every single time,
+giving a total of $\{0, \ldots, k\}$ different possible ways of sampling ball $1$, 
+and a total of  $k + 1$ different ways.
+
+The strategy for general $n$ is to consider that we have $n$ \textit{distinguishable}
+boxes and each time we sample any ball, we are putting it in a given box.
+For example, if the first sample picks ball $4$, we interpret this as
+having placed a ball in box $n = 4$.
+For $n$ boxes, we have $n-1$ boundaries, since each $2$ boundaries
+defines a box. With this in mind, a possible configuration would be
+
+\begin{equation}
+\bullet \bullet \| \bullet | \bullet \bullet \bullet
+\end{equation}
+
+\noindent
+where we have $2$ balls in the first box; an empty second box; a third box with
+one ball; while the fourth, and final box, contains three balls.
+One can see that we have $n + k -1$ spots where each spot is either a boundary or a 
+ball. Given that the $k$ balls are indistinguishable, we finally obtain
+
+\begin{equation}
+\# \mbox{ ways of sampling with replacement} =
+{ n + k - 1 \choose k }
+\end{equation}
+
+\noindent
+We can test this general result for $n=2$:
+
+\begin{equation}
+{ k + 1 \choose k } = k + 1.
+\end{equation}
+
+\section{Discrete Random Variables.}
+
+Random variables associate numerical variables to the outcomes of some experiment.	
+At large, the introduction of random variables will just be a rewriting of the previous 
+expressions.
+Formally, random variables are functions from the sample space to the real numbers.
+We follow the literature and denote a random variables capital letters $X$ while the 
+numerical value they take are denoted by small letters $x$.
+
+Given a random variable, some outcomes happen more often than others.
+Usually one introduces the concept of probability mass function, which for every possible 
+value $x$ gives the \textit{"frequency"} at which $x$ occurs, denoted $p_{X}(x)$ or $p(X = x)$.
+In terms of set formulation of probability theory, the expression $p_{X}(x)$ can be thought as
+the set $S \in \Omega$ for which $X(S) = x$.
+It is very customary though to just write $X = x$ in such a way that the subset $S$ of $\Omega$ is 
+implicit in the discussion.
+
+\paragraph{Example.}
+In a room there are $26$ people. We pick a person at random and measure its height $h$ and its weight
+$w$. We have created two random variables $H$ and $W$ from the sample space of people with definite weights and heights
+to the positive real numbers, the respective height and weight of each person.
+
+\vspace{.5cm}
+It is very natural to conclude that functions of random variables are simply functions applied to all of its possible outcomes,
+that is, functions of functions.
+
+\subsection{Probability mass function and cumulative distribution function.}
+
+For discrete random variables, we define the probability mass function to be the 
+probability that a random variable $X$ takes the value $x$, $p(X = x)$.
+It must be between $0$ and $1$ and must also satisfy:
+
+\begin{equation}
+\sum_{x} p(X = x) = 1.
+\end{equation}
+
+\noindent
+Conversely, if one can find a function that is always positive and has finite sum over all its possible 
+values, one has defined a probability mass function. This trick is particularly interesting for functions
+that have finite Taylor series.
+
+For the remaining of this section we will discuss the most used probability mass functions.
+These distributions are famous because they have a particularly nice story about themselves
+which justifies their usefulness.
+
+When we deal with continuous random variables though, the concept of probability mass function will 
+not be very useful since it is impossible for a random variable to have any particularly fixed
+real value with infinite arbitrary precision, which means $p(X = x) = 0$ for all $x \in S$.
+A concept that is generalizable is called cumulative distribution function, which we denote $F(x)$, 
+and is defined by
+
+\begin{equation}
+F(x) = P( X \leq x).
+\end{equation}
+
+\noindent
+Both probability mass functions (PMF) and the cumulative distribution function (CDF)
+contain the exact same information about the distribution in question.
+
+Later we will consider in more detail the probability mass functions of several random variables,
+which are functions taking values over $[0, 1]$  that depend on two or more random variables.
+For the moment, let us consider two random variables $X$ and $Y$.
+Their \textit{joint} probability distribution is denoted $P(X = x \text{ and } Y = y) = P(X = x, Y = y)$;
+it represents the probability of each random variable acquiring a particular 
+value, and it is related to the probabilities of indiviadual the random variables via marginalization:
+
+\begin{subequations}
+\begin{align}
+&\sum_{y} P(X = x, Y = y) = P(X = x)
+\\
+\nonumber \\
+&\sum_{x} P(X = x, Y = y) = P(Y = y)
+\end{align}
+\end{subequations}
+
+When dealing with multiple random variables, it is 
+necessary to understand whether they are dependent or 
+independent.
+We define independence of two events $A$ and $B$ by
+
+\begin{equation}
+P(A | B) = P(A),
+\end{equation}
+
+\noindent
+that is knowing that the event $B$ happened does not give you any new information
+on the event $A$. You do not have to revise your previous beliefs.
+Since we have defined random variables as functions of events, the 
+independence statement can be written for random variables as 
+
+\begin{equation}
+p(X = x | Y = y) = p(X = x) 
+\quad
+\mbox{ for all 	}
+x, y \in A \cap B.
+\end{equation}
+
+\noindent
+It follows from independence that the probability of 
+both $X = x$ and $Y = y$ having definite values is
+given by
+
+\begin{equation}
+P(X = x, Y = y) = 
+P(X = x)
+P(Y = y),
+\end{equation}
+
+\subsection{Bernoulli distribution.}
+
+A Bernoulli random variable takes two possible values.
+It is customary to call them success and failure, even though
+it is particular to a given problem what we define as success.
+
+The probability mass function is given by the expression
+
+\begin{equation}
+p(X = x) = xp + (1 - x)q
+\end{equation}
+
+\noindent
+for $x$ taking the values $1$ or $0$, success or failure.
+It is easy to check that this is indeed a PMF,
+its values are between $[0,1]$ and it is normalized to $1$,
+
+\begin{equation}
+\sum_{x = 0}^{1} p(X = x) = q + p = 1
+\end{equation}
+
+We will revisit the Bernoulli random variable multiple
+times thourgh out these lectures.
+
+\subsection{Binomial distribution.}
+
+Let us consider the random variable $X$ defined by the sum of independent 
+Bernoulli processes:
+
+\begin{equation}
+X = X_{1} + \ldots + X_{n},
+\end{equation}
+
+\noindent
+that is, we wish to compute the distribution of successes in $n$ independent Bernoulli trials.
+
+Previously, we considered the probability of a coin giving $k$ heads in $n$ trials.
+This is a Binomial process if we interpret heads as success.
+%If we consider the sequence:
+%
+%\begin{equation}
+%0010101010111101011
+%\end{equation}
+%
+%\noindent
+%where $1$ is interpreted as success and $0$ as failure, we can see that for $n = 19$
+%we have obtained $k = 11$ successes, since each of these $n$ Bernoulli trials 
+%is independent we can multiply the probabilities leading us to:
+%
+%\begin{equation}
+%p(0010101010111101011) = 
+%p^{11} q^{8}.
+%\end{equation}
+For general $k$ and $n$ we obtain
+
+\begin{equation}
+p(X = k) = {n \choose k} p^{k} q^{n - k},
+\quad
+\mbox{with }
+q = 1 - p.
+\end{equation}
+
+\noindent
+This PMF is positive defined, always less than $1$, and properly
+normalized as a consequence of the binomial identity.
+
+An interesting fact of binomial distributions is that given two 
+independent binomial random variables $X$ and $Y$, their sum
+$Z = X + Y$ also follows a binomial distribution.
+A particular obvious fact if we think about coin tosses:
+asking for the number of heads in $n$ trials, and then proceed
+to ask for the number of heads in subsequent $m$ trials should
+be distributed as the number of heads in $n + m$ trials.
+We can mathematically prove this fact if we consider marginalization:
+
+\begin{align}
+P(X + Y = k) &= 
+\sum_{j = 1}^{m} P(X + Y = k | Y = j) P(Y = j) 
+\nonumber \\
+\nonumber \\
+&= \sum_{j = 1}^{m} P(X = k - j | Y = j) P(Y = j) =
+\sum_{j = 1}^{m} P(X = k - j) P(Y = j) 
+\nonumber \\
+\nonumber \\
+&= \sum_{j = 1}^{m} {n \choose k - j} p^{k-j} q^{n - k + j} \times
+{m \choose j} p^{j} q^{m - j}
+\nonumber \\
+\nonumber \\
+&= 
+\sum_{j = 1}^{m} {n \choose k - j} {m \choose j} p^{k} q^{n + m -k}.
+\end{align}
+
+\noindent
+If we consider that
+
+\begin{equation} \label{Wandermond}
+\sum_{j = 1}^{m} 
+{n \choose k - j}
+{m \choose j }
+= 
+{m + n \choose k}
+\end{equation}
+
+\noindent
+we obtain the binomial distribution again.
+Equation \eqref{Wandermond} is known as the Vandermonde
+after the first mathematician who considered it.
+It can be understood if we consider different ways of picking
+$k$ objects of $m + n$ in total.
+We can directly pick $k$ out of $m + n$ or we can pick $j$ out of $m$ and 
+$k - j$ out of $n$. If we sum over all possible $j$ picks, these
+two quantities should match. This is the Vandermonde.
+
+Finally we have proved what we wanted, if $X$ and $Y$ are independent
+binomial random variables, their sum $Z = X + Y$ is also a binomial random variable:
+
+\begin{equation}
+P(X + Y = k) = 
+{m + n \choose k} p^{k} q^{m + n - k}
+\end{equation}
+
+\subsection{Hypergeometric distribution.}
+
+Let us consider the following problem:
+In a $5$-hand card, what is the distribution of aces.
+And let us denote the random variable of interest by $X$ which
+parametrizes the number of aces in a $5$-card hand, that is,
+$X \in \{0, 1, 2, 3, 4\}$.
+
+A common mistake is to think that $X$ is a binomial random variable,
+since $X$ can be thought as the sum of Bernoulli random variables 
+that are $1$ if the ace of given type is in the hand.
+This argument is wrong because these Bernoulli random variables are
+\textit{not} independent. Even though the Bernoulli variables take values
+$0$ or $1$, their distributions are dependent of each other, if we know that a given
+ace is in the hand, the likelihood of other aces being present change.
+
+\paragraph{Remark.}
+It is very common to mix a random variable and its distribution.
+One thinks that because two random variables are dependent, their values must change.
+This is not true. The probability distribution is what actually changes.
+
+\vspace{.5cm}
+In the case where the Bernoulli trials are dependent, 
+$X$ is the hypergeometric distribution.
+We have $52\choose{5}$ possible hands and given that $X = k$,
+we have ${4 \choose k}$ possible aces and ${48 \choose 5 - k}$
+non-ace cards.
+By symmetry every possible configuration is likely and therefore
+we can apply the naive definition of probability:
+
+\begin{equation}
+p(X = k) = 
+\frac{ {4 \choose k} {48 \choose 5 - k} }
+{ {52 \choose 5} }
+\end{equation}
+
+\noindent
+This is a valid PMF because the sum over $k$ gives $1$ if we apply the 
+Vandermonde.
+
+The main difference between hypergeometric and binomial distributions
+is replacement. Every time we actually get an ace from the deck we alter the 
+frequency of another ace happening. If the trials we binomial, this would not 
+happen. But if we consider the fact that the number of cards goes to infinite,
+and the number of aces -- number of successes -- goes to infinite too,
+it is intuitively clear that the frequencies must be almost unaltered.
+It is also very unlikely that if we sample a given ace, we resample it again
+on a subsequent trial because the number of aces is very large.
+Therefore on this limit it should be possible to show that the hypergeometric
+and binomial distributions are the same.
+This indeed happens, but we will have to show it later.
+
+The general case of a hypergeometric distribution is given by
+
+\begin{equation}
+P(X = k) = 
+\frac{ {w \choose k} {b \choose n - k} }
+{ {w + b \choose n} }
+\end{equation}
+
+\noindent
+where $w$ and $b$ are the respective successes and failures of Bernoulli variables.
+
+\subsection{Expectations I.}
+
+\paragraph{Expectation.} We define the expectation operator, denoted $\mathbf{E}$, by:
+
+\begin{equation}
+\mathbf{E} [ X ]  = \sum_{x} x p_{X} (x) .
+\end{equation}
+
+\noindent
+It has a nice interpration if one thinks of probabilities in terms of frequencies.
+We average what we expect to have, $x$, weighted by the frequency we expect it to occur $p_{X}(x)$.
+This definition is particularly useful because it is linear:
+
+\begin{equation}
+\mathbf{E} \bigg[  \alpha \left( X + Y \right) + \beta \bigg] = 
+\alpha \mathbf{E} [X] + \beta +
+\alpha \mathbf{E} [Y] + \beta.
+\end{equation}
+
+\noindent
+It is linear for both \textit{dependent} and \textit{independent} random variables\footnote{A very very very non-intuitive fact.}.
+Let us show that $\mathbf{E} [ X + Y ] = \mathbf{E} [ X ] + \mathbf{E} [ Y ]$ for both dependent and independent $X$ and $Y$.
+The proof that linearity under real constants $\alpha$ and $\beta$ is left for the reader.
+From the definition
+
+\begin{align}
+\mathbf{E} [ X + Y ] &=
+\sum_{x = 1}^{\infty} \sum_{j = 1}^{\infty} (x + y) p (X = x, Y = y)
+\nonumber \\
+\nonumber \\
+&= \sum_{x = 1}^{\infty} \sum_{j = 1}^{\infty} x p (X = x, Y = y) 
++
+\sum_{x = 1}^{\infty} \sum_{j = 1}^{\infty} y p (X = x, Y = y)
+\nonumber \\
+\nonumber \\
+&= \sum_{x = 1}^{\infty}  x p (X = x) 
++
+\sum_{j = 1}^{\infty} y p (Y = y)
+\nonumber \\
+\nonumber \\
+&= \mathbf{E} [ X ] + \mathbf{E} [ Y ] 
+\end{align}
+
+\noindent
+where on the third equality we have used marginalization.
+
+It is not true that for a general function of a random variable $X$, $g(X)$, that
+$
+\mathbf{E} \left[ g(X) \right] = 
+g \left( \mathbf{E} \left[ X \right] \right)
+$, which can be interpreted as it is not wise to reason on the avarage.
+However it is true that given a function of a random variable $X$, $g(X)$, we can compute the expectation
+$\mathbf{E} [ g(X) ] $ using
+
+\begin{equation} \label{LOTUS}
+\mathbf{E} \left[ g(X) \right] = \sum_{x} g(x) p_{X} (x)
+\end{equation}
+
+\noindent
+Equation (\ref{LOTUS}) is commonly known as the law of 
+unconscious statistician (LOTUS): it has been widely used by 
+students without realization that it has to be proved. 
+\textcolor{red}{\textbf{TODO: prove it!}}
+%Since this result is important, we will prove it.
+%Let us fix $g(X) = Y$, then
+%
+%\begin{equation}
+%\mathbf{E} \left[ Y \right] =
+%\sum_{y} y \, p_{Y} (y).
+%\end{equation}
+%
+%\noindent
+%It is pretty clear that the problem is to compute $p_Y (y)$, but in some sense, it is 
+%also clear that $Y$ is completely defined in terms of $X$.
+%Consider
+%
+%\begin{equation}
+%p_Y (y) = p_Y ( g(x) ),
+%\end{equation}
+%
+%\noindent
+%such that
+%
+%\begin{equation}
+%\mathbf{E} [ g(X) ] =
+%\sum_{x;\, y = g(x)  }
+%\end{equation}
+%The expectation of a constant random variable is the constant itself: $\mathbf{E} [ A ] = a$ if the 
+%random variable $A$ only takes the value of $a$ with probability $1$.
+%Consider then $\mathbf{E} [ X - \mathbf{E} [ X ] ]$. Using past considerations, we conclude 
+%that $\mathbf{E} [ X - \mathbf{E} [ X ] ] = 0$ and that the operator satisfies $\mathbf{E}^{2} = \mathbf{E}$.
+%This result,
+%
+%\begin{equation}
+%\mathbf{E} [ X - \mathbf{E} [ X ] ] = 0
+%\end{equation}
+%
+%\noindent
+%can be interpreted if we think of probabilities as frequencies: half of the time we will be above the avarage and the other half of the time we
+%will be below avarage.
+%The average collapses to zero.
+%If we wish to know how far off from the mean we are irrespective of the sign, we essentially have to compute the distance from the mean.
+
+Let us compute the expectations for the previously defined random variables.
+
+\paragraph{Bernoulli.}
+The expectation of a Bernoulli random variable $X$ is $\mathbf{E} [ X ] = p$.
+This very simple statement can be used to generalize Bernoulli variables.
+Let us define an indicator random variable $I$ such that $I = 1$ if
+event $A$ happens. It follows that $\mathbf{E} [ I ] = p(A)$.
+
+I do not know if this fact has a name, but I will call it a \textit{fundamental bridge}
+because of its is of fundamental importance.
+Expectations \textit{are} probabilities. One can understand and reformulate all
+of probability theory using expectations. And indicator random variables
+are very useful computational devices.
+
+\paragraph{Binomial.}
+Let us denote by $\sim$ the distribution of a random variable.
+If $X$ has a binomial distribution, we write $X \sim \text{Binomial}[n,p]$.
+Given that a binomial random variable is a sum of Bernoulli trials, by linearity
+we can write
+
+\begin{equation}
+\mathbf{E} [ X ] = n \mathbf{E} [ X_{1} ]  = np .
+\end{equation} 
+
+To illustrate linearity it is interesting to compute this result
+in another way. Consider from the definition
+
+\begin{align}
+\mathbf{E} [ X ] &=
+\sum_{k = 0}^{n} k \, p(X = k) 
+\nonumber \\
+\nonumber \\
+&= \sum_{k = 1}^{n} k \, p(X = k) 
+\nonumber \\
+\nonumber \\
+&= \sum_{k = 1}^{n} 
+k { n \choose k }  p^{k} q^{n - k}
+\nonumber \\
+\nonumber \\
+&= \sum_{k = 1}^{n}
+n {n - 1 \choose k - 1}
+p^{k} q^{n - k}
+\nonumber \\
+\nonumber \\
+&= n \sum_{k' = 0}^{n}
+{n - 1 \choose k' }
+p^{k' + 1} q^{n - k' - 1}
+\nonumber \\
+\nonumber \\
+&= np 
+\sum_{k' = 0}^{n}
+{n - 1 \choose k' }
+p^{k'} q^{n - k' - 1} = np
+\end{align}
+
+\paragraph{Hypergeometric.}
+Let us consider the indicator random variables $X_{j}$ of the $j$th card
+in a $5$-hand card being an ace, $j \in \{1,2,3,4,5\}$.
+By linearity we obtain
+
+\begin{equation}
+\mathbf{E} [ X_{1} + \ldots + X_{5} ] =
+5 \mathbf{E} [ X_{1} ] = 5 \times \frac{4}{52}.
+\end{equation}
+
+\noindent
+where on the last line we used \textit{the fundamental bridge} between
+expectations and probabilities that $\mathbf{E} [X_{1}] =
+p( \text{first card being an ace} ) = 4 / 52$.
+
+For a general hypergeometric, the sum of Bernoulli random variables is dependent.
+But expectations are linear for dependent random variables as well.
+We directly conclude that
+
+\begin{equation}
+\mathbf{E} [ X ] = 
+n p = n \left( \frac{w}{w + b} \right).
+\end{equation}
+
+\noindent
+For the special case of the aces we obtain $p = 4/52$.
+The hypergeometric distribution is particularly useful if one
+wishes to understand probabilities of poker.
+
+\paragraph{Putnam problem.}
+Consider a random permutation of $\{1, 2, \ldots, N\}$ with $N \geq 2$.
+We say that we have a local maxima if the value is greater than its neighbours,
+for example in the permutation
+
+\begin{equation}
+\{1, 2, 3, 4, 5, 7, 6\}
+\end{equation}
+
+\noindent
+we say that $7$ is a local maxima since it is greater than its two neighbours,
+$5$ and $6$.
+Find the expectation of local maxima.
+
+\paragraph{Answer.}
+This problem was considered the most difficult question in the putnam exam, but
+we can solve it in a few lines using the concept of 
+indicator random variables.
+
+Let $X_j$ be the indicator of position $j$ having a local maxima, and 
+$X = X_{1} + \ldots + X_{N}$ being the random variable that gives the number of
+local maxima. The boundary variables $I_{1}$ and $I_{N}$ can only be greater
+than $X_{2}$ and $X_{N-1}$; since each position is equally likely, the probability
+that $X_{1} > X_{2}$ is $1/2$, and so
+
+\begin{align}
+\mathbf{E} [ X ] &= 
+\mathbf{E} [ X_{1} ] + \mathbf{E} [ X_{N} ] + 
+\mathbf{E} [ X_{2} + \ldots + X_{N - 1} ]
+\nonumber \\
+\nonumber \\
+&= \frac{1}{2} + \frac{1}{2} + 
+\mathbf{E} [ X_{2} + \ldots + X_{N - 1} ]
+\nonumber \\
+\nonumber \\
+&= 1 + 
+\mathbf{E} [ X_{2} + \ldots + X_{N - 1} ]
+\nonumber \\
+\nonumber \\
+&= 1 + (N - 2) \mathbf{E} [ X_{2} ] = 1 + (N - 2) p(X_{2}).
+\end{align}
+
+\noindent
+All that is left to do is to compute the probability 
+that position $X_{2}$ is a local maxima.
+By symmetry, any of the three positions is equally likely 
+to have the maximum number, which gives, using the naive definition, 
+a probability of $1/3$; the local maxima has lend right in the middle.
+Therefore
+
+\begin{equation}
+\mathbf{E} [ X ] =
+1 + \frac{(N - 2)}{3}	.
+\end{equation}
+
+A common mistake is to think that the middle position has 
+$1/2$ chance of being greater than the number on the left, and a
+$1/2$ chance of being greater than the number on the right, giving
+a total of $1/4$. Unfortunately, $X_{j}$ are not independent
+random variables, if we know that the number on the right is 
+lower than the number on the left, and the number on the left is 
+lower than the central number, it must follow that the number on 
+the right is lower than the central number.
+
+\subsection{Geometric Distribution.}
+Let us consider independent Bernoulli trials and count the number of 
+failures until the first success. This is a geometric process
+with probability mass function given by
+
+\begin{equation} \label{geometricdistribution}
+P(X = k) = p q^{k}.
+\end{equation}
+
+\noindent
+It is called geometric distribution because it is given by a geometric series:
+
+\begin{equation}
+\sum_{k=0}^{\infty} p q^{k} = \frac{p}{1 - q} = 1.
+\end{equation}
+
+\paragraph{Memory.}
+Let us show that the geometric distribution is a memoryless process.
+Suppose now that the first $t$ tosses are tails, we wish 
+to calculate 
+$ p ( X \geq t + s \, | \, X \geq t ) $, that is
+the probability that the first head happens at toss $t + s$ given 
+that we have already failed at least $t$ times.
+If this is indeed a memoryless process, this must be equal to
+
+\begin{equation} \label{memorylessProcess}
+p ( X \geq t + s \, | \, X \geq t ) = 
+p ( X \geq s ).
+\end{equation}
+
+To prove this statement we apply the definition of conditional probability:
+
+\begin{align}
+p ( X \geq t + s \, | \, X \geq t ) = 
+\frac{p ( X \geq t + s \, \, \text{and} \, \, X \geq t )}{ p( X \geq t) } =
+\frac{p ( X \geq t + s )}{ p( X \geq t) } 
+\end{align}
+
+\noindent
+and observe that the event $X \geq t$ is inside the event $X > t + s$ and so 
+the intersection is trivial.
+If 
+
+\begin{equation}
+\frac{p ( X \geq t + s )}{ p( X \geq t) }  = 
+p ( X \geq s )
+\end{equation}
+
+\noindent
+is true, then it must also be true that
+
+\begin{equation} \label{geometricmemorylesstoprove}
+p( X \geq t + s ) =
+p( X \geq s ) p ( X \geq t).
+\end{equation}
+
+\noindent
+And we are going to prove \eqref{geometricmemorylesstoprove} now.
+From the definitions:
+
+\begin{equation}
+p( X \geq t + s ) = 1 - p( X < t + s )
+\end{equation}
+
+\noindent
+and we have to calculate the probability of failing \textit{for less than} $t + s$ times,
+considering that we could fail at the first toss, or the second, or the third and so on,
+the probability is given by
+
+\begin{equation}
+P( X < t + s ) = 
+p + pq + pq^{2} + \ldots + p q^{t + s - 1}
+\end{equation}
+
+\noindent
+since all of these events are disjoint, you cannot fail at the first toss and the second toss.
+This is a partial geometric series and we can write its the sum as:
+
+\begin{equation}
+P( X < t + s ) =
+1 - q^{t + s}.
+\end{equation}
+
+\noindent
+This result can be recycled for the other too computations so that we obtain
+
+\begin{equation}
+P( X \geq t + s ) =
+q^{t + s},
+\quad
+P( X \geq s ) = 
+q^{s}
+\quad
+\text{and}
+\quad
+P( X \geq t ) =
+q^{t}
+\end{equation}
+
+\noindent
+and memorylessness is satisfied.
+It is possible to show that the geometric distribution is the only
+memoryless distribution. \textcolor{red}{(TODO)}
+
+\paragraph{Expectation.}
+We can use the memorylessness property to compute the expected value
+of the geometric distribution. Remember that we have defined 
+the random variable $X$ to be the number of failures until the first success,
+which means that if we have obtained a success on the first trial, we have zero failures,
+$0 \times p $. However, if we fail on the first trial, because the process is memoryless,
+we have to start it all over again; mathematically:
+
+
+
+
+leading us to the following equation
+
+\begin{equation}
+\mathbf{E} [ X ] = 0 p + ( 1 + \mathbf{E} [X] ) q
+\end{equation}
+
+\noindent
+which can be solved directly
+
+\begin{equation}
+\mathbf{E} [ X ] = \frac{q}{p}.
+\end{equation}
+
+We could have computed the expectation from the definition
+
+\begin{align}
+\mathbf{E} [ X ] &=
+\sum_{k = 1}^{\infty}
+k p q^{k} = 
+p \sum_{k = 1}^{\infty} k q^{k}
+\end{align}
+
+\noindent
+with help of
+
+\begin{equation}
+q \frac{\partial}{\partial q}
+\sum_{k = 0}^{\infty} q^{k} =
+q \frac{\partial}{\partial q}
+\left( \frac{1}{1 - q} \right) =
+\frac{q}{(1 - q)^{2}}
+\end{equation}
+
+\noindent
+we again obtain the same result
+
+\begin{equation}
+\mathbf{E} [X] =
+\frac{q}{p}.
+\end{equation}
+
+\paragraph{Example.}
+Let us count the number of tosses until first success instead of the number of 
+failures. If I have $k$ failures until the first success, it means I have tossed the coin $k + 1$ 
+times. Let this random variable be represented by $X$; it is related to the geometric distribution 
+$Y$ via $X = Y + 1$, which means 
+
+\begin{equation}
+X - 1 \sim \text{Geometric} (p).
+\end{equation}
+
+\noindent
+The geometric distribution \eqref{geometricdistribution} implies
+
+\begin{align}
+P(X - 1 = k) = p q^{k}
+\quad
+\Rightarrow
+\quad
+P(X = k + 1) = p q^{k}.
+\end{align}
+
+\noindent
+And we can redefine $k + 1 = k'$ to count powers of $X$ from which we obtain
+
+\begin{equation}
+P(X = k') = p q^{k' - 1}.
+\end{equation}
+
+\noindent
+Notice that this distribution is already normalized.
+The expectation of this distribution can be calculated directly from the
+expectation of the geometric and linearity:
+
+\begin{equation}
+\mathbf{E} [X] = \mathbf{E} [Y] + 1 = \frac{q}{p} + 1 = 
+\frac{1}{p}.
+\end{equation}
+
+\noindent
+This expectation just states the intuitive fact that we have to wait
+a period of $1/p$ if we have a frequency of $p$ for a result to happen.
+Considering a fair coin, this means that on average we need $2$ tosses
+to see the first heads since there is only two possibilities which are
+equally likely.
+
+
+\subsection{Negative Binomial distribution.}
+
+We could generalize the story behind the geometric distribution and consider the 
+random variable $X$ defined as the number of failures until we reach $r$ successes in independent Bernoulli
+trials.
+An example would be the sequence:
+
+\begin{equation}
+1000100100001001.
+\end{equation}
+
+\noindent
+In this example $r = 5$ in $n=11$ trials.
+Notice that whatever the sequence turns out to be, it must always end with a $1$. 
+We do not care about the positions of our successes in the past $10$ trails,
+therefore
+
+\begin{equation}
+P( X = n ) = { n + r - 1 \choose n } p^{r} q^{n},
+\end{equation}
+
+\noindent
+for $n = 0, 1, 2, \ldots$.
+
+\paragraph{Expectation.}
+The expectation of this negative binomial distribution can be calculated directly
+with the help of indicator random variables. 
+Let $I_j$ be the random variable that measures the number of failures between the 
+success $j-1$ and $j$, that is 
+
+\begin{equation}
+I_{j} \sim \text{Geometric}(p)
+\end{equation}
+
+\noindent
+and then 
+
+\begin{equation}
+\mathbf{E}[X] = \mathbf{E} \left[ 
+I_1 + \ldots + I_r \right] = r \left( \frac{q}{p} \right).
+\end{equation}
+
+\subsection{Poisson distribution.}
+
+In this section, we will define the Poisson distribution,
+which is arguably the most useful discrete random variable.
+It can model any process with very large sample space, where 
+each subset of the sample space has a very tiny probability of sucess.
+
+Let us consider the Taylor series for $e^{\lambda}$:
+
+\begin{equation}
+\exp{\lambda} = \sum_{k = 1}^{\infty} \frac{\lambda^{k}}{k !}
+\end{equation}
+
+\noindent
+and notice that it gives a normalized probability mass function
+
+\begin{equation}
+1 = \sum_{k = 1}^{\infty} e^{-\lambda}  \frac{\lambda^{k}}{k !},
+\end{equation}
+
+\noindent
+for the Poisson process:
+	
+\begin{equation}
+P(X = k) = e^{-\lambda} \frac{\lambda^{k} }{k!}
+\end{equation}
+
+\noindent
+where $\lambda$ is any positive real number, and $k \in \{0, 1, 2, \ldots \}$.
+
+\paragraph{Poisson approximation.}
+Take $A_{1}, \ldots, A_{n}$ events with $n$ large such that
+$p(A_{1}) = p_{1}, \ldots, p(A_{n}) = p_{n}$ are very small.
+If $A_{1}, \ldots, A_{n}$  are independent then the number of 
+$A_{j}$'s that occur is approximately Poisson with 
+$\lambda = \sum_{j = 1}^{n} p_{j}$.
+
+\vspace{.5cm}
+The Poisson approximation formalizes our intuition that a Poisson process
+models very well a large sample space where each event has a tiny probability.
+It even gives an estimation for $\lambda$.
+However, it does not provide an estimate for $n$. The approximation actually works 
+very well even if $n$ is not large.
+
+A consequence of the Poisson approximation is that an infinity number of independent
+Bernoulli trials is approximated by the Poisson distribution if the probability of 
+each Bernoulli trial is small.
+Mathematically, the Poisson distribution must result from the limit $n \to \infty$ 
+together $p \to 0$ applied on the binomial distribution.
+Let $X \sim \text{Binomial[n, p]}$ with $n \to \infty$ and $p \to 0$ keeping
+$np$ fixed. Define $\lambda = np$ such that
+
+\begin{align}
+P(X = k) &= 
+{n \choose k}
+p^{k} q^{n - k}
+= {n \choose k} \left( \frac{\lambda}{n} \right)^{k}
+\left( 1 - \frac{\lambda}{n} \right)^{n - k}
+\nonumber \\
+\nonumber \\
+&= \frac{n!}{k! (n - k)!} 
+\left( \frac{\lambda}{n} \right)^{k}
+\left( 1 - \frac{\lambda}{n} \right)^{n - k}
+\nonumber \\
+\nonumber \\
+&= \frac{n!}{n^{k} (n - k)!} 
+\left( \frac{\lambda^{k}}{k!} \right)
+\left( 1 - \frac{\lambda}{n} \right)^{n - k}
+\nonumber \\
+\nonumber \\
+&= \frac{n \times (n-1) \times \ldots \times (n - k + 1)}{n \times n \times n \ldots \times n} 
+\left( \frac{\lambda^{k}}{k!} \right)
+\left( 1 - \frac{\lambda}{n} \right)^{n - k}.
+\end{align}
+
+\noindent
+Taking the limit $n \to \infty$ the first term goes to $1$, while the last
+term gives the definition of exponential function, and finally
+
+\begin{equation}
+\lim_{n \to \infty} P_{\tiny{Binomial}} (X = k ) = 
+e^{- \lambda} \frac{\lambda^{k}}{k!}
+\end{equation}
+
+\paragraph{Example.}
+Find approximation for the probability that there are $3$ people with the same 
+birthday.
+
+\paragraph{Answer.}
+There are ${n \choose 3}$ groups of people with $3$ people. 
+Let $I_{ijk}$ with $i < j < k$ be the indicator random variable that 
+$3$ people have the same birthday, therefore
+
+\begin{equation}
+\mathbf{E} [ X ] =
+{n \choose 3} \mathbf{E} [ I_{123} ] =
+{n \choose 3}
+\frac{365}{365} \frac{1}{365} \frac{1}{365}
+\end{equation}
+
+\noindent
+is the \textit{exact} expectation that $3$ people have the same birthday.
+Now consider that the number of possible groups with $3$ people 
+is very large, but it is very unlikely that a group contains $3$ people
+that have birthdays at the exact same date, hence the Poisson approximation
+is valid and we can write
+
+\begin{equation}
+P(X \geq 1) = 1 - P(X = 0) = 1 - \frac{\lambda^{0}}{0!} e^{-\lambda} = 
+1 - e^{-\lambda}
+\end{equation}
+
+\noindent
+with $\lambda$ being equal to $\mathbf{E}[X]$.
+
+The expected value for the Poisson distribution is 
+
+\begin{align}
+\mathbf{E} [ X ] &= \sum_{k=0}^{\infty} k P(X = k)
+\nonumber \\
+\nonumber \\
+&= e^{-\lambda} \sum_{k = 1}^{\infty} k \frac{\lambda^{k}}{k!}
+\nonumber \\
+\nonumber \\
+&= e^{-\lambda} \sum_{k = 1}^{\infty} \frac{\lambda^{k}}{(k - 1)!}
+\nonumber \\
+\nonumber \\
+&= \lambda e^{-\lambda} \sum_{k = 1}^{\infty} \frac{\lambda^{k-1}}{(k - 1)!}
+\nonumber \\
+\nonumber \\
+&= \lambda e^{-\lambda} e^{\lambda} = \lambda
+\end{align}
+
+\section{Solved Problems.}
+
+\subsection{Gambler's ruin.}
+
+\paragraph{Problem.}
+Two gamblers, $A$ and $B$, play a sequence of bets such that
+$P(A\text{ wins a round}) = p$. 
+What is the probability that $A$ wins the entire game.
+Assume that $A$ starts with $i$ and $B$ with $N-i$.
+
+\paragraph{Answer.}
+We have, from the point of view $A$, a random walk.
+Since each round is independent, $A$ has the same probability of winning each round.
+This allows us to generate a recursive equation for the 
+probability that $A$ wins the game.
+Let us define
+
+\begin{equation}
+p_{i} = \text{Probability of A winning the game starting with } i \text{ dollars.}
+\end{equation}
+
+\noindent
+and then condition on the first round:
+
+\begin{align}
+p_{i} &= p p( \text{A winning starting with } i \, | \, \text{A won the first round} ) 
+\nonumber \\
+&+ q p( \text{A winning starting with } i \, | \, \text{A lost the first round} ).
+\end{align}
+
+\noindent
+but if $A$ won the round, since each trial is independent is as if the game starts again, but 
+now $A$ has $i + 1$ dollars if he/she has won or $i - 1$ dollar if he/she has lost.
+Therefore we obtain
+
+\begin{equation}
+p_{i} = p p_{i + 1} + q p_{i - 1}.
+\end{equation}
+
+\noindent
+This type of difference equation is subjected to the following boundary conditions:
+$p_{0} = 0$ and $p_{N} = 1$, that is, $A$ has no chance of winning if has no more money left,
+and $A$ surely wins if he/she has all available money in the game.
+The solution is given by
+
+\begin{equation}
+p_{i} = 
+\begin{cases}
+\frac{1 - (q/p)^{i}}{ 1 - (q/p)^{N}} &\mbox{if } q \neq p
+\\
+\frac{i}{N} &\mbox{if } q = p = 1/2.
+\end{cases}
+\end{equation}
+
+\noindent
+I have computed some probabilities.
+If the game has a slightly disadvantage $p = 0.49$, and we start with half of the money, we obtain
+$p_{0.5} = 0.49$ as a probability of winning.
+However, if with the same odds $p=0.49$ we start with $i = 0.7$ of the money we obtain
+$p_{i} = 0.69$. It is interesting that our probability of winning increases if we have more money,
+and unintuitive. I think it just reflects the fact that you might be able to afford more losses
+if you have more money even if the odds are against you.
+
+\subsection{Cupom Collector problem.}
+
+\paragraph{Problem.}
+There are $n$ toy types given by a Fast Food restaurant that are equally likely to be obtained.
+What is the expected time until we have the complete set of toys?
+
+\paragraph{Answer.}
+Let us define the random variable $T_{n}$ as the time to get a new toy, that is, $T_{1}$ is the time
+until first new toy, $T_{2}$ is the time until the second new toy, \textit{etc.}
+The probability of obtaining the first toy is $1$, since you always start with a new toy;
+it follows that the second toy, out of $n$ has a probability $(n-1)/n$ of occuring. The 
+same reasoning can be applied to the probability of obtaining all $n$ toys.
+
+Each $T_{i}$ is then distributed as geometric random variable:
+
+\begin{align}
+&T_{1} - 1 \sim \text{Geometric}[1]
+\nonumber \\
+\nonumber \\
+&T_{2} - 1 \sim \text{Geometric}\left[ \frac{n - 1}{n} \right]
+\nonumber \\
+\nonumber \\
+&T_{3} - 1 \sim \text{Geometric}\left[ \frac{n - 2}{n} \right]
+\nonumber \\
+&\quad \vdots
+\nonumber \\
+&T_{n} - 1 \sim \text{Geometric}\left[ \frac{1}{n} \right]
+\end{align}
+
+The expectation can be computed via linearity:
+
+\begin{align}
+\mathbf{E} \left[ T_{1} + \ldots + T_{n} \right] 
+&= \frac{n}{n-1} + \ldots + \frac{n}{1}
+\nonumber \\
+\nonumber \\
+&= n \bigg( 1 + \frac{1}{2} + \ldots + \frac{1}{n} \bigg)
+\nonumber \\
+\nonumber \\
+&\sim n \log n .
+\end{align}
+
+\noindent
+In the last line we have used the approximation for the harmonic series.
+
+\subsection{Blissvile and Blotchville problem.}
+
+\paragraph{Problem.}
+Fred lives in Blissville where buses always arrive on time with the time difference
+between successive buses fixed at $10$ minutes.
+Having lost his watch, he arrives at the bus stop at a uniformly random time on a certain day
+(assume that buses run $24$ hours a day, every day, and that the time Fred arrives is 
+independent of the bus arrival process).
+
+\begin{enumerate}
+\item What is the distribution of how long Fred has to wait for the next bus?
+What is the average time Fred has to wait?
+
+\item Given that he bus has not yet arrived after $6$ minutes, what is the probability 
+that Fred will have to wait at least $3$ more minutes?
+
+\item Fred moves to Blotchville, a city with inferior urban planning and where buses
+are much more erratic. Now, when any bus arrives, the time until the next bus arrives is an Exponential
+random variable with mean $10$ minutes.
+Fred arrives at the bus stop at a random time, not knowing how long ago the previous bus came.
+What is the distribution of Fred's waiting time for the next bus? What is the average time 
+that Fred has to wait?
+
+\item When Fred complains to a friend how much worse transportation is in Blotchville, the friend
+says: \textit{Stop whinning! You arrive at a uniform instant between the previous bus arrival and 
+the next bus arrival. The average length of that interval between buses is $10$ minutes, but
+since you are equally likely to arrive at any time in that interval, your average waiting time is 
+only $5$ minutes}. Why the friend's reasoning is wrong?
+\end{enumerate}
+
+\paragraph{Answer.}
+\begin{enumerate}
+\item As soon as Fred arrives at the bus stop, 
+the bus can arrive at any time between his arrival and $10$ minutes with
+equal probability. The waiting time distribution is uniform on the interval $[0,10]$;
+and therefore the mean is $5$.
+
+\item We have to compute
+
+\begin{equation}
+P( t > 3 + 6 \,|\, t \geq 6 ) = 
+\frac{ P( t > 3 + 6 ) }{ P( t \geq 6 ) } =
+\frac{1/10}{4/10} = 
+1 / 4
+\end{equation}
+
+\item Because the exponential distribution is a memoryless process, after Fred arrives at the bus 
+station, the waiting time distribution is also exponential with mean $10$ minutes.
+The average waiting time is $10$ minutes.
+The previous problem is not memoryless, the waiting time is for the next $3$ minutes has probability:
+$P( t > 3 ) = 7/10$, which is different from $1/4$.
+
+\item This is a case of length-time bias. The friend is mistaking the average time interval between
+bus arrivals for the actual time of bus arrivals.
+In reality, Fred is more likely to arrive during long interval times than on short intervals.
+\end{enumerate}
+
+\subsection{Expected number of Heads Heads -- Brute force.}
+
+\paragraph{Problem.}
+If we consider a fair coin, what is the expected number of tosses
+until we obtain Heads Heads for the first time? And Heads Tails?
+
+\paragraph{Answer.}
+Later we will find explore different ways to answer this question.
+For the moment, let us approach this problem in a very brute force way:
+counting how many sequences of length $n$ that do not contain $HH$ inside
+exist.
+
+We will count the number of sequences in a recursive way.
+Let us denote the sequences of length $n$ that contain no $HH$ by
+$g_{n}$.
+And first, let us count the number of sequences for $n=1$:
+
+\begin{equation}
+\begin{pmatrix}
+H \\
+T
+\end{pmatrix}.
+\end{equation}
+
+\noindent
+Each possible sequence is a line in this matrix, and we have $2$ sequences in total.
+To obtain $n = 2$, we observe that it is always possible to attach
+a tails $T$ to any of the previous sequences, giving a total of $ 1 \times g_{n - 1}$.
+However, we are allowed to add a heads $H$ if and only if the previous sequence
+does not end in heads. How many of these sequences that end with $T$ are there?
+There are $g_{n - 2}$ because for every sequence of length $n-2$ we can add a tails 
+in the end by our previous consideration.
+Recursively, we can generate $g_{n}$:
+
+\begin{equation} \label{fibo}
+g_{n} = g_{n-1} + g_{n-2}
+\end{equation}
+
+\noindent
+provided that we know the values of $g_{2}$ and $g_{1}$.
+This recursion is valid for $n \geq 3$. The value of $g_{1}$
+has already been computed, $2$. For $g_{2}$ we obtain:
+
+\begin{equation}
+\begin{pmatrix}
+H T \\
+T T \\
+T H
+\end{pmatrix},
+\end{equation}
+
+\noindent
+a total of $3$ sequences.
+Equation \eqref{fibo} subjected to conditions $g_1 = 2$ and $g_2 = 3$ 
+is the Fibonacci sequence.
+
+The sample space is the space of all sequences of $H$ and $T$ of length
+$n$. Since each spot of the sequence has $2$ possibilities, we obtain
+a $2^{n}$ number of possible configurations.
+Therefore, the probability that a sequence of length $n$ ends with
+$HH$ is
+
+\begin{equation}
+p_n = \frac{g_{n - 3}}{2^{n}}.
+\end{equation}
+
+\noindent
+The factor $g_{n - 3}$ enters in the expression because a sequence that ends with
+$HH$ must be a sequence of length $n-2$ that ends with a tails $T$ -- something like
+$... THH$ -- and there are $g_{n-3}$ sequences that contain no $HH$ and end with a 
+$T$. This expression allows a recursive formula for the probability $p_{n}$:
+
+\begin{equation} \label{recHH}
+p_{n} = \frac{1}{2} p_{n - 1} + \frac{1}{4} p_{n - 2}
+\end{equation}
+
+\noindent
+where we have just replaced the Fibonacci sequence for $g_{n-3}$.
+The recursion \eqref{recHH} is valid for $n \geq 4$ and has boundary 
+conditions $p_{2} = 1/2$ and $p_{3} = 1/8$ -- the only sequence of
+length $3$ that ends with $HH$ is $THH$.
+
+The explicit solution is
+
+\begin{equation}
+p_{n} =  \frac{5 - \sqrt{5}}{10} \left( \frac{1 + \sqrt{5}}{4} \right)^{n} 
++ 
+\frac{5 + \sqrt{5}}{10} \left( \frac{1 - \sqrt{5}}{4} \right)^{n} 
+\end{equation}
+
+\noindent
+and the expected value can be computed
+
+\begin{equation}
+\mathbf{E} [ HH ] = \sum_{n = 2}^{\infty} n p_{n} = 6
+\end{equation}
+
+\noindent
+which means that on average we have to toss $6$ times until
+we see the first $HH$.
+
+The average number of tosses until $HT$ is a bit easier.
+We first wait for the first time $H$ appears, and
+then after the first $H$ has appeared we wait again
+for the first $T$.
+That is we expect $2$ tosses until $H$ and $2$ more tosses
+until $T$: 
+
+\begin{equation}
+\mathbf{E} [ HT ] = 2 + 2 = 4
+\end{equation}
+
+These two numbers are different. 
+And at first glance this is very unintuitive since we think
+that because $H$ and $T$ occur with the same probability
+there is a symmetry which dictates that every possible sequence
+is equally likely and thus every pattern should occur with equal
+expectation.
+
+This reasoning is almost entirely correct. Indeed there is a symmetry
+between $H$ and $T$, but the symmetry actually simply implies that if 
+we substitute in every expression $H$ by $T$ and vice-versa, we must
+obtain the same probabilities. This gives $\mathbf{E} [ HH ] = \mathbf{E} [ TT ]$.
+It is also true that every sequence should occur with equal probability, since
+on average the appearance of $H$ has exactly the same frequency of $T$.
+
+\begin{center}
+\textcolor{red}{TODO: RIGHT MORE ABOUT THIS}
+\end{center}
+
+
+\section{Continuous random variables.}
+
+The main difference between continuous and discrete random variables is that 
+continuous random variables can take values on an interval in the real line whereas 
+discrete random variables can take an enumarate set of values.
+
+A particular stricking consequence of this definition is that the PMF of 
+a continuous random variable is zero: $P(X  = x) = 0$.
+We can see this if we think about the relationship between the PMF and the CDF;
+a well-defined CDF converges to $1$ and has jumps each time a probability of an 
+event is different from zero. The height of the jump is by definition the value of 
+the PMF. A continuous random variable on the other hand has a continuous CDF since it 
+can take any value on the real line, which implies the total probability increases
+smoothly as we travel further in the line. 
+The CDF of a continuous random variable has no jumps and therefore has
+zero PMF.
+
+Interstingly enough, a continuous CDF has a derivative.
+Something that it is not true in the discrete case because of the jumps.
+Let us call the derivative of a continuous CDF the probability density function (PDF)
+usually denoted $\rho(x)$.
+By the fundamental theorem of calculus, it is valid for any continuous random variable
+$X$:
+
+\begin{equation}
+P( X \in B) = \int_{B} \rho(x) \mathrm{d}x
+\end{equation}
+
+\noindent
+where $B$ is any subset of the real line, $\rho(x)$ is the PDF of $X$.
+Moreover, since each individual point has zero probability, the
+following equalities are true:
+
+\begin{equation}
+P( a \leq X \leq b ) = P( a < X < b ) = P( a < X \leq b ) = P ( a \leq X < b).
+\end{equation}
+
+In general, a valid PDF can be any function $\rho(x)$ that satisfies two properties:
+
+\begin{itemize}
+\item Non-negative: $\rho (x) > 0$ for every $x \in B$
+\item Its integral over $\mathbf{R}$ exists and gives $1$: $\int_{-\infty}^{+\infty} \rho(x) = 1$
+\end{itemize}
+
+\subsection{Uniform distribution.}
+
+A uniform random variable has probability density defined by
+
+\begin{equation}
+\rho(x) = 
+\begin{cases}
+\frac{1}{(b - a)}, \quad &\text{for } x \in [a,b], \\
+\, 0, \quad &\text{otherwise.}
+\end{cases}
+\end{equation}
+
+\noindent
+The probability is equally distributed along the interval $[a,b]$.
+The cumulative probability function can be directly computed
+
+\begin{equation}
+F(x) = \int_{a}^{x} \frac{\mathrm{d} x}{(b - a)}  
+= \frac{x - a}{b - a}
+\end{equation}
+
+\paragraph{Universality of the uniform.}
+The uniform distribution is very useful for simulation of random variables.
+Consider that we have $X$ with CDF $F(x)$. It follows if $U \sim \text{Uniform}(0,1)$
+that $F^{-1}(U) = X$.
+
+The proof of this statement is a direct computation 
+of the CDF of $F^{-1}(U)$ (Notice that $F^{-1}(U)$ takes a number between $[0,1]$ to
+the range of $x$):
+
+\begin{align}
+P(F^{-1} ( U ) \leq x )  &= 
+P(U \leq F(x) ) = F(x)
+\end{align}
+
+\noindent
+where the last line follows because the CDF of a uniform on $[0,1]$ is 
+proportional to the interval, which is an interval defined by $[0, F(x)] \subset [0, 1]$.
+
+Possible complications can arrise depending on the nature of $F(x)$. 
+For instance, it could be non-invertible.
+Most of the time, we will not be worried about these things, because a real
+function can always be inverted on some subset of the original domain, the 
+inverse function theorem in real analysis.
+
+Let us apply this theorem on an example. 
+If we consider the exponential distribution:
+
+\begin{equation}
+F(x) = 1 - e^{- x}
+\end{equation}
+
+\noindent
+and set $u = F(x)$, we obtain
+
+\begin{equation}
+\ln \left( 1 - u \right) = x.
+\end{equation}
+
+\noindent
+Distribution-wise $1 - U \sim U$ and so we can ignore the constant inside the logarithm.
+By the universality of the uniform, we obtain that
+
+\begin{equation}
+X = \ln U
+\end{equation}
+
+\noindent
+is distributed with CDF $F(x)$.
+
+\subsection{Normal distribution.}
+
+The most famous distribution of all statistics, the normal distribution is extremely used
+because the central limit theorem\footnote{To be defined later.}.
+
+\paragraph{Standard Normal distribution.}
+A continuous random variable $Z$ is a standard normal, $Z \sim N(0,1)$, if
+its PDF is given by
+
+\begin{equation}
+\rho(x) = \frac{1}{\sqrt{2 \pi}} e^{-z^{2}/2}, 
+\quad
+\text{where }
+z \in \mathbf{R}.
+\end{equation}
+
+\noindent
+The CDF of a normal distribution is usually denoted $\Phi (z)$, and it does not 
+have a closed form using elementary functions:
+
+\begin{equation}
+\Phi(z) = \int_{-\infty}^{z} \frac{1}{\sqrt{2 \pi}} e^{-t^{2}/2} \mathrm{d} t.
+\end{equation}
+
+\noindent
+There are several symmetry properties for the normal distribution:
+
+\begin{itemize}
+\item The PDF $\rho(z)$ is an even function.
+\item Because the PDF is even, the CDF satisfies: $\Phi(-z) = 1 - \Phi(z)$.
+To prove this, use the substitution $z \mapsto -z$.
+\item From the previous considerations it follows that $-Z \sim N(0,1)$ also.
+Just compute $P(-Z \leq z)$ and apply the previous property.
+\end{itemize}
+
+\paragraph{Normalization constant.}
+Even though the CDF function cannot be computed. Its value at infinity can be calculated, $\Phi ( \infty ) $.
+The trick is to square the integral, which allows conversion to polar coordinates:
+
+\begin{equation}
+\int_{-\infty}^{+\infty} 
+\int_{-\infty}^{+\infty} 
+e^{- (x^{2} + y^{2}) / 2}
+\mathrm{d}x \mathrm{d} y
+= 
+\int_{0}^{2 \pi} 
+\int_{0}^{+\infty} 
+e^{- r^{2} / 2}
+r \mathrm{d}r \mathrm{d} \theta
+= 
+2 \pi.
+\end{equation}
+
+\paragraph{Location-scale transformation.}
+Let $X$ be a random variable and $Y = \sigma X + \mu$ where
+$\sigma$ and $\mu$ are two real numbers with $\sigma > 0$.
+We say that $Y$ is obtained by a location-scale transformation of $X$.
+For example, if $X \sim \text{Uniform}[a,b]$ and $Y = c X + d$ then
+$Y \sim \text{Uniform}[ca + d, cb + d]$.
+Beware: the location-scale transformation
+should be applied to the random variable itself and not to its 
+PDF; the confusion is a case of sympathetic magic.
+
+\paragraph{Normal distribution.}
+If $Z \sim N(0,1)$ then $X = \mu + \sigma Z$ is said to have
+normal distribution $X \sim N(\mu, \sigma^{2})$.
+We can get back from $X$ to $Z$ via \textit{standarlization}.
+Define
+
+\begin{equation}
+\frac{X - \mu}{\sigma^{2}} \sim N(0 , 1)
+\end{equation}
+
+\noindent
+for $X \sim N(\mu, \sigma^{2})$.
+This process allows us to extend all of our results for standard normal to a normal distribution.
+The CDF becomes
+
+\begin{subequations}
+\begin{equation}
+F(x) = \Phi \bigg( \frac{x - \mu}{\sigma} \bigg)
+\end{equation}
+
+\noindent
+and the PDF can be obtained by taking the derivative
+
+\begin{equation}
+\rho(x) = \frac{1}{\sigma} \rho_{\texttt{SN}} \bigg( \frac{x - \mu}{\sigma} \bigg)
+\end{equation}
+\end{subequations}
+
+\noindent
+where $\texttt{SN}$ denotes standard normal.
+
+\paragraph{Benchmarks of normal distribution.}
+Let $Z \sim N(\mu, \sigma^{2})$, then it is true that
+
+\begin{center}
+\begin{itemize}
+\item $P ( |Z| < 1 ) \approx 0.68$;
+\item $P ( |Z| < 2 ) \approx 0.95$;
+\item $P ( |Z| < 3 ) \approx 0.997$.
+\end{itemize}
+\end{center}
+
+\subsection{Exponential distribution.}
+
+If we consider a geometric process in continuous time where where 
+succeses arrive at a rate $\lambda$ per unit of time we obtain an exponential
+distribution. This is a very interesting result that we shall discuss in a second.
+But first, let us introduce the exponential distribution.
+
+% Look at exercise 45 of Blietzstein.
+%Let the time interval be sliced in segments of length $\Delta t$.
+%For a process that starts at time $0$ and ends at time $T$, we have defined a 
+%partition on the interval $T - 0 = n \Delta t$,
+%where $n$ is the number of intervals $\Delta t$ that fit inside $T - 0$.
+%In the limit $n \to \infty$, we obtain a continuous time. 
+%The probability of success $p$ on each interval $\Delta t$ is a constant 
+%$\lambda$ such that in the total interval we expected a constant rate of success:
+%$p = \lambda \Delta t$.
+%Consider then
+%\begin{equation}
+%p ( 1 - p )^{k} 
+%= \lambda \Delta t  \left(  1 - \lambda \Delta t \right)
+%\end{equation}
+
+The PDF of an exponential distribution is
+given by
+
+\begin{equation}
+\rho(x) = \lambda e^{-\lambda x}
+\quad 
+\text{for } 
+x \in [0, \infty)
+\end{equation}
+
+\noindent
+and we say that $X \sim \text{Exponential}[\lambda]$. 
+The cumulative distribution is 
+
+\begin{equation}
+F(x) = \int_{0}^{x} \lambda e^{- \lambda u} \mathrm{d} u =
+1 - e^{-\lambda x}.
+\end{equation}
+
+\noindent
+The exponential distribution is not defined over the entire
+real line, the location-scale transformation will alter its distribution,
+precisely it will modify its range.
+However, it is possible to use a scale transformation.
+Let $X \sim \text{Exponential} [1] $ then define 
+$Y = X / \lambda$; it follows that $Y \sim \text{Exponential} [ \lambda ] $.
+Conversely, $\lambda Y \sim \text{Exponential}[1]$ if $ Y \sim \text{Exponential} [ \lambda ]$.
+
+\paragraph{Memory.}
+The exponential distribution is a memoryless process.
+If you have waited days for your success, it hasn't become more likely.
+One can also show that the exponential distribution is the only memoryless
+distribution. If we recall equation \eqref{memorylessProcess}
+
+\begin{equation} 
+p ( X > t + s \, | \, X \geq t ) = 
+p ( X > s )
+\end{equation}
+
+\noindent
+which is the definition of a memoryless process,
+let us define $G(t) = p ( X > t )$ allowing us to rewrite
+it as 
+
+\begin{equation} \label{memoryless2}
+G(t + s) = G(t) G(s). 
+\end{equation}
+
+\noindent
+Some properties can be deduced from \eqref{memoryless2}.
+First, take $t = s = 0$, giving $G(0) = G^{2}(0)$ which implies $G(0) = 1$\footnote{Or $0$, a solution that we will ignore.}.
+Next, take $t = -s$ from which we find that $G(-t) = G^{-1}(t)$. 
+Finally, differentiating with respect to $s$ and applying the result at $s = 0$ leads us to
+
+\begin{equation}
+\dot{G}(t) = \dot{G}(0) G(t) = \lambda G(t).
+\end{equation}
+
+\noindent
+It is easy to verify that the exponential distribution is the 
+solution of this differential equation given that $G(t) = e^{- \lambda t}$
+subjected to the boundary condition $G(0) = 1$.
+
+\paragraph{Connection to Poisson and Geometric distributions.}
+There is a duality between discrete random variables and continuous distributions that I
+suspect might be useful.
+
+Let us consider the problem of finding how much time it takes until until
+some pre-determined Poisson event happens.
+For example, if we think about how many buses arrive at the bus station, this 
+problem follows -- within a reasonable approximation -- a Poisson distribution.
+The number of buses is large, but each specefic bus has a small probability
+of arriving at the station at any particular exact instant.
+This is precisely what the Poisson distribution models.
+
+In any case, what we really wish to compute is
+the expected time until the first bus arrives given that 
+the number of buses that arrive at the station is distributed as Poisson
+with some $\lambda$.
+The bridge between continuous and discrete variables is 
+given by the following statement:
+\textit{the probability that the arrival time is greater than
+some specific time $t$ is equal to the probability that no buses have
+arrived at the station until $t$}:
+
+\begin{equation}
+P(T \geq t) = P ( \text{No buses until time } t ).
+\end{equation}
+
+\noindent
+The rate in which buses arrive is given by $\lambda$, which means
+that on an interval of size $t$ we have about $\lambda t$ buses on average.
+This means
+
+\begin{equation}
+P ( \text{No buses until time } t ) = e^{- \lambda t} \frac{(\lambda t)^{0}}{0!} = e^{-\lambda t}.
+\end{equation}
+
+\noindent
+Therefore, 
+
+\begin{equation}
+P(T \geq t) = e^{-\lambda t}
+\end{equation}
+
+\noindent
+is distributed as an exponential of $\lambda$. 
+The waiting time random variable has no memory if the distribution of buses is Poisson.
+
+Because the sum of independent Poisson is also Poisson, the next time interval
+$T_{2} - T_{1}$ where $T_{1}$ is the time until arrival of the first bus, and
+$T_{2}$ is the time inteval until arrival of the second bus, is also
+distributed as exponential with parameter $\lambda$.
+In fact, every subsequent interval will be memoryless.
+This is different than saying that the total time, $T_{1} + (T_{2} - T_{1}) + \ldots$, is
+exponential. It is not; we will see the distribution later.
+
+For the geometric distribution, the random variable $X$ measures the number of failed tosses
+until the first success.
+What is the waiting time until the first heads appears?
+If we throw a coin with frequence $\omega$, then on a time interval of length $\Delta t$
+we would have thrown $\omega \Delta t$ in total.
+The distribution of $X$ is then
+
+\begin{equation}
+P(X + 1 \leq \omega \Delta t) = p  + p q^{1} + \ldots + p q^{\omega \Delta t - 1}.
+\end{equation}
+
+\noindent
+Using the formula for the geometric series, we obtain
+
+\begin{equation}
+P(X + 1 \leq \omega \Delta t) = 1 - q^{\omega \Delta t}
+\end{equation}
+
+\noindent
+which is an exponential distribution with mean $- \omega / \ln q$.
+\textcolor{red}{TODO:} write about interpretation of this result.
+
+\subsection{Expectation II.}
+The expectation of continuous random variables is defined in 
+terms of the PDF: 
+
+\begin{equation}
+\mathbf{E} [ X ] = \int_{\mathbf{R}} x \rho(x) \mathrm{d} x.
+\end{equation}
+
+\noindent
+It is possible to arrive at this description by taking the continuous limit
+of the discrete case definition.
+We can see that it tells us something about the center of mass of the distribution.
+It is also possible to define other measures of central tendency.
+
+\paragraph{Median.}
+For any random variable $X$, we say that $c$ is a median if $P(X \leq c) \geq 1/2$ and
+$P(X \geq c ) \leq 1/2$.
+Intuitively, the median is the value where half of the mass of the distribution falls
+to left and the other half falls to the right.
+
+\paragraph{Mode.}
+For a discrete random variable $X$, the mode is defined as the maximum of the PMF, 
+while for continous random variables the maximum of the PDF is called mode.
+The mode represents the greatest mass density of all values of the distribution.
+
+\paragraph{Uniform.}
+Let $X \sim \text{Uniform}[a,b]$ then
+
+\begin{equation}
+\mathbf{E} [ X ] = 
+\int_{a}^{b} \frac{ x \mathrm{d} x }{b - a} = 
+\frac{1}{2} \left( \frac{b^{2} - a^{2}}{b - a} \right) = 
+\frac{1}{2} ( a + b ).
+\end{equation}
+
+\noindent
+The median is exactly equal to the mean and any value in the interval $[a,b]$ is 
+a mode.
+
+\paragraph{Gaussian.}
+Let $Z \sim N(0,1)$ be standard normal.
+From the definition we obtain
+
+\begin{equation}
+\mathbf{E} [ Z ] = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^{\infty} z e^{-z^{2}/2} \mathrm{d}z = 0
+\end{equation}
+
+\noindent
+because the integrand is an odd function and integration interval is symmetric.
+The median and the mode are equal to the mean.
+
+Given the transformation $X = \sigma Z + \mu$, it is true that $X \sim N(\mu, \sigma^{2})$.
+In particular we obtain
+
+\begin{equation}
+\mathbf{E} [ X ] = \mathbf{E}[ \sigma Z + \mu ] = \mu
+\end{equation}
+
+\noindent
+using linearity.
+
+\paragraph{Exponential.}
+The mean of the exponential distribution is
+
+\begin{equation}
+\mathbf{E} [ X ] = \int_{0}^{\infty} \lambda x e^{-\lambda x } \mathrm{d} x  = \frac{1}{\lambda}.
+\end{equation}
+
+\noindent
+The exponential decay makes the mode equal to $0$; while the median 
+
+\begin{equation}
+1 - e^{-\lambda x} = \frac{1}{2} \, \implies \,
+x = -\frac{1}{\lambda} \ln 2
+\end{equation}
+
+\vspace{.5cm}
+As important as notions of central tendency, it is also possible to measure the spread 
+of a random variable.
+
+\subsubsection{Variance and Standard Deviation.}
+We call variance the distance squared from the mean, it is defined as
+
+\begin{equation}
+\mbox{Var} [ X ] = \mathbf{E} \left[ ( X - \mathbf{E} [ X ] )^{2} \right].
+\end{equation}
+
+\noindent
+Like the expected value, the variance is a single-number summary of 
+the distribution of a random variable.
+It tells us how spread the distribution is relative to its mean.
+
+We can expand inside the brackets,
+
+\begin{equation}
+( X - \mathbf{E} [ X ] )^{2} = 
+X^{2} - 2 X \mathbf{E} [ X ] + \mathbf{E} [X]^{2},
+\end{equation}
+
+\noindent
+and apply the expectation, we obtain
+
+\begin{equation}
+\mathbf{E} [ ( X - \mathbf{E} [ X ] )^{2} ] = 
+\mathbf{E} [ X^{2} ] - \mathbf{E} [ X ]^{2}.
+\end{equation}
+
+\begin{itemize}
+\item $\mbox{Var} [ X + c ] = \mbox{Var} [ X ]$ for any constant $c$.
+If we shift the distribution, it should not affect its variability.
+
+\item $\mbox{Var} [ c X ] = c^{2} \mbox{Var} [ X ]$ for any real number $c$.
+
+\item If $X$ and $Y$ are independent, then $ \mbox{Var} [ X + Y ] = \mbox{Var} [ X ] + \mbox{Var} [ Y ]$.
+The proof needs the introduction of covariance, which will discuss later.
+
+\item $\mbox{Var} [ X ] \leq 0$ with equality holding if and only if $P ( X = a) = 1$ for any real number $a$.
+The proof of this property follows directly from the definition.
+\end{itemize}
+
+The standard deviation is defined as the square root of the variance and it is usually denoted by $\sigma$:
+
+\begin{equation}
+\sigma [ X ] = \sqrt{ \mbox{Var} [ X ]  }
+\end{equation}
+
+\noindent
+The standard deviation is not linear, it satisfies:
+
+\begin{equation}
+\sigma [ \alpha X + \beta ] = | \alpha | \sigma [ X ] .
+\end{equation}
+
+\paragraph{Bernoulli.}
+The variance of a Bernoulli random variable is
+
+\begin{equation}
+\mbox{Var} [ X ] =  \mathbf{E} [ X^{2} ]  - \mathbf{E}^{2} [ X ]
+\end{equation}
+
+\noindent
+where the first term can be computed with LOTUS
+
+\begin{equation}
+\mathbf{E} [ X^{2} ] = \sum_{k = 0}^{1} k^{2} p( X = k) = p.
+\end{equation}
+
+\noindent
+Together we obtain
+
+\begin{equation}
+\mbox{Var} [ X ] = p - p^{2} = p q .
+\end{equation}
+
+\paragraph{Binomial.}
+A Binomial process is a sum of $n$ independent Bernoulli trials.
+Since the variance of independent events is the sum of variances
+we obtain
+
+\begin{equation}
+\mbox{Var} [ X ] = n p q
+\end{equation}
+
+\paragraph{Geometric.}
+We need to compute
+
+\begin{equation}
+\mathbf{E} [ X^{2} ]  =
+\sum_{k = 1}^{\infty} k^{2} p q^{k} = \frac{q (1 + q)}{p^{2}}
+\end{equation}
+
+\noindent
+which implies
+
+\begin{equation}
+\mbox{Var} [ X ] = \mathbf{E} [ X^{2} ] - \mathbf{E}^{2} [ X ] =
+\frac{q (1 + q)}{p^{2}} - \left( \frac{q}{p} \right)^{2} = \frac{q}{p^{2}}.
+\end{equation}
+
+\noindent
+The variance is also the same if we wish to compute the distribution of
+first success, because shifting by constants does not alter the result.
+
+\paragraph{Negative Binomial.}
+The negative binomial distribution is the sum of independent
+geometric distributions. 
+It readily follows that
+
+\begin{equation}
+\mbox{Var} [ X ] = r \frac{q}{p^{2}}
+\end{equation}
+
+\paragraph{Poisson.}
+Using LOTUS
+
+\begin{equation}
+\mathbf{E}[X^{2}] = \sum_{k = 0}^{\infty} k^{2} P ( X = k ) = 
+e^{-\lambda} \sum_{k = 0}^{\infty} k^{2} \frac{\lambda^{k}}{k!} = \lambda ( 1 + \lambda ).
+\end{equation}
+
+\noindent
+This implies
+
+\begin{equation}
+\mbox{Var} [ X ] = \lambda ( 1 + \lambda) - \lambda^{2} = \lambda.
+\end{equation}
+
+\noindent
+The Poisson distribution is the only distribution where the mean and the variance
+have the same value.
+
+In order to compute the variance of dependent random variables we need to introduce the 
+concept of covariance.
+Let us before that explore the interpretation of higher moments of a distribution.
+
+\section{Moments and generating functions.}
+
+\subsection{Moments.}
+
+If we let $X$ be random variable with mean $\mu$ and variance $\sigma^{2}$, 
+then we define
+
+\begin{itemize}
+\item The \textit{n}th moment of $X$ by \[ \mathbf{E}[ X^{n} ]; \]
+
+\item The \textit{n}th central moment by \[ \mathbf{E} [ (X - \mu)^{n} ]; \]
+
+\item The \textit{n}th standardized moment by \[ \mathbf{E} \left[ \left( \frac{X - \mu}{\sigma} \right)^{n}  \right].  \]
+\end{itemize}
+
+In general we say that $X$ is symmetric around its mean $\mu$ if $X - \mu$ has the same distribution
+as $\mu - X$. In fact, we do not have much freedom, if $X$ is symmetric around a number $\mu$, then 
+$\mu$ must be the mean since
+
+\begin{equation}
+\mathbf{E} [ X ] - \mu = \mathbf{E} [ X - \mu ] = \mathbf{E} [ \mu - X ] = \mu - \mathbf{E} [ X ]
+\end{equation}
+
+\noindent
+which implies $\mathbf{E} [ X ] = \mu$.
+Moreover, $\mu$ must also be the median since
+
+\begin{equation}
+P( X \leq \mu ) = P ( X \geq \mu)
+\end{equation}
+
+\noindent
+follows directly from the definition of symmetry.
+
+If $X$ has a PMF, then symmetry implies
+
+\begin{equation}
+F(x) = P ( X - \mu \leq x - \mu ) = 
+P ( \mu - X \leq x - \mu ) = P( X \leq 2\mu - x) = 1 - F(2 \mu - x )
+\end{equation}
+
+\noindent
+which after differentiating on both sides yields
+
+\begin{equation}
+\rho(x) = \rho( 2 \mu - x).
+\end{equation}
+
+\noindent
+Functions with symmetry $f(x) = f(a - x)$ have maximum at $a/2$.
+Therefore the above equation implies that the PDF has maximum at $\mu$,
+which means $\mu$ is a mode of $X$.
+
+For a symmetric distribution is possible to show that every odd
+moment is zero. It follows simply from the consideration that
+
+\begin{equation}
+\mathbf{E} [( X - \mu )^{m} ] = - \mathbf{E} [ (\mu - X)^{m} ] = - \mathbf{E} [ (X - \mu)^{m} ]
+\end{equation}
+
+\noindent
+for odd $m$.
+This is enough evidence to study the odd moments as measures of skewness.
+The first standardized moment is always zero, leaving us only the third moment.
+Define then skewness as the third standardized moment, such that
+positive skewness is indicative of having a long right tail relative to the left tail,
+and negative skewness is the opposite.
+Notice that exist asymmetric distributions whose odd central moments are zero.
+
+\begin{center}
+\textcolor{red}{TODO:Write about kurtosis}
+\end{center}
+\subsection{Moment generating functions.}
+Moment generating functions are a useful computation device for 
+calculating moments of a distribution.
+Remember that the $n$-th moment of a distribution, denoted $m_{n}$, is defined
+as
+
+\begin{equation}
+m_{n} = \mathbf{E} [ X^{n} ].
+\end{equation}
+
+\paragraph{Definition.}
+Consider the polynomial $M(t)$ where the coefficient of the $n$-th power is
+$m_{n}$:
+
+\begin{equation}
+M(t) = m_{0} + m_{1} t + m_{2} \frac{t^{2}}{2!} + m_{3} \frac{t^{3}}{3!} + \ldots. 
+\end{equation} 
+
+\noindent
+By construction it follows that
+
+\begin{equation}
+m_{n} = \frac{\mathrm{d}^{n} M(t) }{\mathrm{d} t^{n} } \bigg\vert_{t = 0}
+\end{equation}
+
+\noindent
+which means that we can generate the moments of the distribution if we know $M(t)$.
+In principle, a random variable could have moments of arbitrary order, so this sum
+is infinite. But if we use linearity of the expectation operator:
+
+\begin{align}
+M(t) &= 1 + \mathbf{E}[X t ]  + \mathbf{E}\left[ X^{2} \frac{t^{2}}{2!} \right]  + 
+\mathbf{E} \left[ X^{3} \frac{t^{3}}{3!} \right] + \ldots
+\nonumber \\
+\nonumber \\
+&= \mathbf{E} \left[ 1 + X t + X^{2} \frac{t^{2}}{2!} + X^{3} \frac{t^{3}}{3!} + \ldots \right]
+\nonumber \\
+\nonumber \\
+& = \mathbf{E} \left[ e^{t X } \right]
+\end{align}
+
+\noindent
+the sum colapses into an exponential.
+Actually, linearity is not enough to guarantee that we can absord an infinite number of 
+terms inside the expectation, but we apply it anyway without further justification.
+If the sum converges, then $M(t)$ exists and we have defined the moment generating function.
+The domain of $t$ is not of any importance in here, we just need $M(t)$ to be defined for
+some interval on the real line.
+
+There are two important facts about moment generating functions
+that we are going to state without proof. 
+There is, for each distribution, only one momentum generating function and vice-versa. And
+given two \textit{independent} random variables, the momentum generating function of their 
+sum is given by the product of the corresponding momentum generating functions -- a direct
+application of LOTUS.
+
+\subsubsection{Bernoulli distribution.}
+
+We consider a Bernoulli random variable distributed according 
+to $p$ and $q$.
+The momentum generating function can be computed via LOTUS:
+
+\begin{equation}
+M(t) = \sum_{k = 0}^{1} e^{tk} \bigg[ kq + (1 - k)p \bigg] 
+= e^{t} p + q.
+\end{equation}
+
+\subsubsection{Binomial distribution.}
+
+Let $X$ be binomial, $X \sim \text{Binomial}[n,p]$.
+From the definition, $X$ is the sum of independent Bernoulli trials.
+It follows
+
+\begin{equation}
+M(t) = ( p e^{t} + q )^{n}.
+\end{equation}
+
+\noindent
+In the last equality we used the binomial theorem.
+
+\subsubsection{Geometric distribution.}
+
+If instead we let $X \sim \text{Geometric}[p]$, the 
+momentum generating function is 
+
+\begin{equation}
+M(t) = \sum_{k = 0}^{\infty} e^{tk} p q^{k} = \frac{p}{1 - e^{t} q}
+\end{equation}
+
+\noindent
+Notice that the sum of two independent geometric distributions does not 
+follow a geometric distribution. 
+
+\subsubsection{Negative Binomial distribution.}
+ 
+If we consider a sum of independent geometric distributions, we obtain
+a negative binomial distribution, which implies
+
+\begin{equation}
+M(t) = \left[ \frac{p}{1 - e^{t} q} \right]^{n}.
+\end{equation}
+
+
+\subsubsection{Hypergeometric distribution.}
+
+The closed form of the moment generating function for the hypergeometric distribution 
+depends on hypergeometric functions, and are beyond the scope of this notes.
+We will write an alternative version which does not have a closed form, but is
+expressed as a function of $n$.
+
+First consider
+
+\begin{equation}
+( 1 + y e^{t} )^{a} = \sum_{j = 0}^{a} {a \choose j} e^{jt} y^{j}
+\end{equation}
+
+\noindent
+and 
+
+\begin{equation}
+( 1 + y )^{b} = \sum_{k = 0}^{b} {b \choose k} y^{k}
+\end{equation}
+
+\noindent
+Then the trick is to notice that
+
+\begin{align}
+( 1 + e^{t} y )^{a} ( 1 + y )^{b} &= 
+\bigg[ {a \choose 0} {b \choose 0}  e^{0 t} \bigg] y^{0} +
+\bigg[ {a \choose 1} {b \choose 0}  e^{1 t} + {a \choose 0} {b \choose 1}  e^{0 t}  \bigg] y^{1} 
+\nonumber \\
+\nonumber \\
+&+  \ldots + \bigg[ \sum_{k = 0}^{n} {a \choose k} {b \choose n - k}  e^{k t} \bigg] y^{n}  + \ldots 
++ \bigg[ \sum_{k = 0}^{a + b} {a \choose k} {b \choose n - k}  e^{k t} \bigg] y^{a+b} 
+\end{align}
+
+\noindent
+gives the hypergeometric momentum genereting function if we normalize it appropriately:
+
+\begin{equation}
+( 1 + e^{t} y )^{a} ( 1 + y )^{b} = 
+\sum_{n = 0}^{a + b} M(t) y^{n} { a + b \choose n }
+\end{equation}
+
+\noindent
+such that
+
+\begin{equation}
+M(t) = 
+\frac{(a + b - n)!}{(a + b)!}
+\frac{\partial^{n}}{\partial y^{n} } 
+\bigg( ( 1 + e^{t} y )^{a} ( 1 + y )^{b} \bigg)_{y = 0}
+\end{equation}
+
+\noindent
+I this point I really do not know a useful application for $M(t)$. 
+But it must be useful for poker.
+
+\subsubsection{Poisson distribution.}
+
+For $X \sim \text{Poisson}[\lambda, k]$ the momentum generating function is
+
+\begin{equation}
+M(t) = \sum_{k = 0}^{\infty} e^{tk} e^{-\lambda} \frac{\lambda^{k}}{k!}  = e^{-\lambda} e^{e^{t} \lambda}
+\end{equation}
+
+\noindent
+Interestingly enough, notice that the sum of two independent Poisson's parametrized by $\lambda$ is
+again Poisson.
+To see why two dependent Poisson distributions would not be Poisson, consider the extreme case $Y + X = 2X$.
+
+\subsubsection{Uniform distribution.}
+
+Let us consider $U \sim \text{Uniform}[0,1]$. The general uniform parametrized by 
+$[a,b]$ can be obtained by the variable redefinition:
+
+\begin{equation}
+(b - a) U + a = X.
+\end{equation}
+
+The moment generating function can be calculated with LOTUS
+
+\begin{equation}
+M(t) = \int_{0}^{1} e^{tx} \mathrm{d} x = \frac{1}{t} \left( e^{t} - 1 \right),
+\end{equation}
+
+\noindent
+from which the moments $m_{n}$ can be directly derived:
+
+\begin{align}
+M(t) &= \frac{1}{t} \left( \sum_{n=0}^{\infty} \frac{t^{n}}{n!} - 1 \right) 
+\nonumber \\
+\nonumber \\
+&= \sum_{n = 1}^{\infty} \frac{t^{n-1}}{n!}
+\nonumber \\
+\nonumber \\
+&= \sum_{n=1}^{\infty} \frac{(n-1)!}{n!} \frac{t^{n-1}}{(n-1)!}
+\end{align}
+
+\noindent
+and give
+
+\begin{equation}
+m_{n} = 
+\frac{(n-1)!}{n!}
+\end{equation}
+
+\subsubsection{Exponential distribution.}
+
+Let $X \sim \text{Exponential}[1]$. 
+The general case with $\lambda$ can be obtained by the 
+change of variables
+
+\begin{equation} \label{expredef}
+X = \lambda Y, 
+\quad
+\text{where }
+X \sim \text{Exponential}[1].
+\end{equation}
+
+From the definition, we have then
+
+\begin{equation}
+M(t) = \int_{0}^{\infty} e^{tx} e^{-x} \mathrm{d}x = 
+\int_{0}^{\infty} e^{-(1-t)x} \mathrm{d} x = \frac{1}{1 - t}
+\end{equation}
+
+\noindent
+where $|t| < 1$ otherwise the integral diverges.
+Notice that we have obtained a geometric series,
+which means the moments can be read directly
+
+\begin{equation}
+M(t) = \sum_{n=0}^{\infty} t^{n} = 
+\sum_{n=0}^{\infty} n! \frac{t^{n}}{n!}
+\end{equation}
+
+\noindent
+so that
+
+\begin{equation}
+m_{n} = n!
+\end{equation}
+
+Using the redefinition \eqref{expredef} we obtain
+
+\begin{equation}
+m_{n} = \frac{n!}{\lambda^{n}}
+\end{equation}
+
+\subsubsection{Gaussian distribution.}
+
+Let $Z \sim N(0,1)$ be a standard normal distribution.
+The general case with parameters $\sigma$ and $\mu$ can be obtained 
+from the change of variables
+
+\begin{equation}
+\frac{X - \mu}{\sigma} = Z.
+\end{equation}
+
+The moment generating function gives
+
+\begin{align}
+M(t) &= \frac{1}{ \sqrt{2 \pi } } \int_{-\infty}^{+\infty}
+e^{t x} e^{-\frac{x^{2}}{2}} \mathrm{d} x
+\nonumber \\
+\nonumber \\
+&= \frac{1}{ \sqrt{2 \pi } } \int_{-\infty}^{+\infty}
+e^{- \frac{(x - t)^{2}}{2}} e^{-\frac{t^{2}}{2}} \mathrm{d} x 
+\nonumber \\
+\nonumber \\
+&= e^{- \frac{t^{2}}{2} }.
+\end{align}
+
+\noindent
+In the first equallity we have completed squares, and in the last equality
+we used the fact that a standard normal integrated over its domain gives $1$.
+
+The same technique from previous sections can be applied -- just expand $e^{-t^{2}}$ in
+Taylor series and collect the coefficients. We obtain
+
+\begin{equation}
+m_{2n} = \frac{(2n)!}{2^{n} n !}
+\end{equation}
+
+\noindent
+while every odd moment is zero.
+
+\subsection{Probability generating functions.}
+
+Let us consider the redefinition $t = \log u$ inside $M(t)$:
+
+\begin{equation}
+M( \log u ) = \mathbf{E} \left[ e^{ X \log u } \right] 
+= \mathbf{E} \left[ u^{X} \right].
+\end{equation}
+
+\noindent
+Using LOTUS this expression is equivalent to the following polynomial
+
+\begin{equation}
+\mathbf{E} \left[ u^{X} \right] = 
+\sum_{k} u^{k} p ( X = k) = 
+p_{0} + p_{1} u + p_{2} u^{2} + \ldots
+\end{equation}
+
+\noindent
+where we have abbreviated $p_{0} = p(X = 0)$, $p_{1} = p(X = 1)$, $p_{2} = p(X = 2)$, \textit{etc}.
+This polynomial is called probability generating function and we are going 
+to denote it by $H(t)$:
+
+\begin{equation}
+H(t) = \mathbf{E} [ t^{X} ].
+\end{equation}
+
+\noindent
+Because it is related to $M(t)$ by a redefinition, and it is a way to compute the probabilities that we have
+used to define our random variables, we are not going to rederive various expressions for it; just observe that the 
+probability generating function for independent random variables is the product of probability generating functions -- 
+a consequence of LOTUS.
+
+The usefulness of $H(t)$ is best illustrated in practical computations.
+Until now if we wished to compute the probabilities of obtaning a $10$ when throwing six dices, 
+we would have to count all configurations which sum to give $10$,
+a horrible task.
+Moreover, even if we succeeded in such counting, we do not 
+obtain information about configurations with $11$, $12$, or $4$ for that matter.
+
+\subsubsection{Dice polynomial -- Dodo.}
+Let us consider a fair dice. From the definition we can write
+
+\begin{equation}
+H(t) = \frac{1}{6} \left( t + t^{2} + \ldots + t^{6} \right).
+\end{equation}
+
+\noindent
+And using the partial sums of the geometric series:
+
+\begin{equation}
+H(t) = 
+\frac{t}{6} \left( \frac{1 - t^{6}}{1 - t} \right).
+\end{equation}
+
+\noindent
+For $N$ independent dices, the polynomial becomes
+
+\begin{equation}
+H(t) = 
+\left( \frac{t}{6} \right)^{N} \left( \frac{1 - t^{6}}{1 - t} \right)^{N}
+\end{equation}
+
+\noindent
+and in principle we have computed any relevant probability of the problem. Just
+derive $H(t)$ a number of times and set $t$ to zero.
+The advantage is that this problem can now be very easily programed.
+In particular, the Taylor series of $H(t)$ for $N = 5$:
+
+\begin{align}
+H(t) &=
+\frac{t^{5}}{7776} + \frac{5 t^{6}}{7776} + \frac{5 t^{7}}{2592} + \frac{35 t^{8}}{7776} 
++ \frac{35 t^{9}}{3888} + \frac{7 t^{10}}{432} + \frac{205 t^{11}}{7776} + \frac{305 t^{12}}{7776} 
+\nonumber \\
+\nonumber \\
+&+ \frac{35 t^{13}}{648} + \frac{5 t^{14}}{72} + \frac{217 t^{15}}{2592} + \frac{245 t^{16}}{2592} 
++ \frac{65 t^{17}}{648} + \frac{65 t^{18}}{648} + \frac{245 t^{19}}{2592} + \frac{217 t^{20}}{2592} 
+\nonumber \\
+\nonumber \\
+&+ \frac{5 t^{21}}{72} + \frac{35 t^{22}}{648} + \frac{305 t^{23}}{7776} + \frac{205 t^{24}}{7776} 
++ \frac{7 t^{25}}{432} + \frac{35 t^{26}}{3888} + \frac{35 t^{27}}{7776} + \frac{5 t^{28}}{2592} 
+\nonumber \\
+\nonumber \\
+&+ \frac{5 t^{29}}{7776} + \frac{t^{30}}{7776} 
+\end{align}
+
+\noindent
+was obtained with the Python code below:
+
+\begin{verbatim}
+	import sympy as sp
+	
+	# Number of dices
+	N = 5
+	
+	t = sp.symbols('t')
+	A = (1 - t**6)
+	B = (1 - t)
+	H = ( t / 6 ) * (A/B)
+	H = H ** N
+	
+	sp.pprint(H.series(t, 31), use_unicode = False).
+\end{verbatim}
+
+\noindent
+As a sanity check, the probability must start from $5$, since we have five dices.
+It must also end at $30$, the case where all five dices give $6$.
+The probability of $30$ is $1/6^{5} = 1/7776$ in agreement with the coefficient of
+$t^{30}$. Other cases are also easily countable, like the probability of obtaning a sum of $6$ in
+$5$ dices, which comes from a configuration $21111$ with $5$ possible places for the number $2$.
+The probability of this configuration is $5 / 6^{5}$ again matching the coefficient of $t^{6}$.
+
+The advantage of this polynomial becomes apparent if we wish to compute the probability of obtaining 
+a sum of $13$ for example. Counting such configurations is a complicated task
+(\textcolor{red}{TODO}), but the polynomial gives readily that there are $420$ configurations, 
+and a probability of obtaining such configuration equal to $35/648$.
+
+As a final observation, notice that the sum of all coefficients gives $1$.
+This must always be the case since
+
+\begin{equation}
+H(t = 1) = \sum_{k} p_{k} = 1
+\end{equation}
+
+\section{Joint Distributions.}
+
+\end{document}
