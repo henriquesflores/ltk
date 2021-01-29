@@ -14,15 +14,16 @@ int main() {
     const char *s = "This is a *test sentence* with bold.";
     String_View w = sv(s);
 
-    printf(SVFMT"\n", SVARG(w));
- 
+    size_t i = sv_find_str(&w, sv("w"));
+
+    
+#if 0
     String_View piece; 
     while (sv_consume_char(&piece, &w, '*')) {
         printf(SVFMT"\n", SVARG(piece));
     }
 
 
-#if 0
     String_View file = readfile("./test.md");
     Vector a = sv_find(file, '$');
 #endif

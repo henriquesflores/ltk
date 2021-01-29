@@ -113,9 +113,32 @@ String_View sv_chop_char(String_View *sv, char c) {
     return choped;
 }
 
-int sv_consume_char(String_View *piece, String_View *sv, char c) {
-    *piece = sv_chop_char(sv, c);
-     return piece != sv ? 0 : 1;
+size_t sv_sum(String_View sv) {
+    size_t s = 0;
+    for(size_t i = 0; i < sv.len; i++) {
+        s += sv.str[i];
+    }
+    return s;
+}
+
+size_t sv_find_str(String_View *sv, String_View find) {
+    // It is possible in very special cases that
+    // this function finds a substring that does not exist.
+    // Find an explicit example
+    size_t N = sv->len - find.len + 1;
+    if (N < 0)
+        return 0;
+
+    size_t needle = sv_sum(find);
+    for (size_t j = 0; j < N; j++) {
+        String_View temp = (String_View) {sv->str + j, find.len};
+        size_t haysack = sv_sum(temp);
+
+        if (needle == haysack) 
+            return j;
+    }
+
+    return 0;
 }
 
 #endif // LTK_H
