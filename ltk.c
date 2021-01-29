@@ -1,29 +1,33 @@
-#include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
 
-#include "Strings.h"
-#include "Memory.h"
+#include "ltk.h"
 
+#if 0 
 #define MAX_CAPACITY (1 * KILO)
 uint8_t membuffer[MAX_CAPACITY];
 Memory memory = { .capacity = MAX_CAPACITY,
                   .size     = 0,
                   .buffer   = membuffer };
+#endif
 
 int main() {
+    const char *s = "This is a *test sentence* with bold.";
+    String_View w = sv(s);
 
-    const char *s = "This is *a bold text*";
-    String_View sv = string(s);
-    printsv(&sv); 
-    String_View muts = string("Does this work?");
-    printsv(&muts);
-    const char *cmuts = sv_to_cstr(&muts);
-    printf("%s\n", cmuts);
-     
+    printf(SVFMT"\n", SVARG(w));
+ 
+    String_View piece; 
+    while (sv_consume_char(&piece, &w, '*')) {
+        printf(SVFMT"\n", SVARG(piece));
+    }
+
+
+#if 0
+    String_View file = readfile("./test.md");
+    Vector a = sv_find(file, '$');
+#endif
 
     return 0;
 }
+
 
