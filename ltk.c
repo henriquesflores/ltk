@@ -13,19 +13,14 @@ Memory memory = { .capacity = MAX_CAPACITY,
 int main() {
     const char *s = "This is a *test sentence* with bold.";
     String_View w = sv(s);
-
-    size_t i = sv_find_str(&w, sv("w"));
-
+    String_View nw = sv_replace_str(w, sv("*"), sv("\\textbf{"));
     
+    printf(SVFMT, SVARG(nw));
+
 #if 0
-    String_View piece; 
-    while (sv_consume_char(&piece, &w, '*')) {
-        printf(SVFMT"\n", SVARG(piece));
-    }
-
-
     String_View file = readfile("./test.md");
-    Vector a = sv_find(file, '$');
+    size_t hm = sv_count_char(file, '$');
+    printf("%ld\n", hm);
 #endif
 
     return 0;
