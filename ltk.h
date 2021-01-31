@@ -11,7 +11,7 @@
 #define VEC_INCREASE 10
 #define INITIAL_CAPACITY 20
 #define MAXPATH 256
-#define MAXSTR 256
+#define MAXSTR (2 * 1024)
 
 typedef struct String_View {
     const char *str;
@@ -32,79 +32,6 @@ void printsv(String_View sv) {
 
 void sv_free(String_View *str) {
     free((char *)str->str);
-}
-
-String_View readfile(const char *filepath) {
-    FILE *f = fopen(filepath, "r");
-
-    fseek(f, 0, SEEK_END);
-    long file_size = ftell(f);
-    fseek(f, 0, SEEK_SET);
-
-    char *contents = malloc(file_size + 1);
-
-    size_t bytes_read =
-        fread(contents, 1, file_size, f); 
-
-    assert(bytes_read == file_size);
-    contents[file_size] = 0;
-    fclose(f);
-    
-    return (String_View) {contents, file_size};
-}
-
-String_View sv_chop_char(String_View *sv, char c) {
-    size_t i = 0;
-    while (i <= sv->len && sv->str[i] != c) {
-        i++;
-    }
-
-    if (i > sv->len)
-        return *sv;
-
-    String_View choped = {sv->str, i};
-
-    sv->str = sv->str + i + 1;
-    sv->len = sv->len - i - 1;
-
-    return choped;
-}
-
-size_t sv_count_char(String_View sv, char c) {
-    int i = 0;
-    for (size_t j = 0; j < sv.len; j++) {
-        i += sv.str[j] == c ? 1 : 0;
-    }
-
-    return i;
-}
-
-int sv_find_str(String_View sv, String_View find) {
-    size_t N = sv.len - find.len + 1;
-    if (N < 0)
-        return -1; 
-
-    for (size_t j = 0; j < N; j++) {
-        int needle = memcmp(find.str, sv.str + j, find.len);
-
-        if (!needle) 
-            return j;
-    }
-
-    return -1; 
-}
-
-String_View sv_chop_str(String_View *sv, String_View find) {
-    int index = sv_find_str(*sv, find);
-
-    if (index == -1)
-        return *sv;
-
-    String_View result = {sv->str, index};
-    sv->str += index + find.len;
-    sv->len -= index + find.len;
-
-    return result;
 }
 
 String_View sv_trim_left(String_View sv) {
@@ -129,17 +56,78 @@ String_View sv_trim(String_View sv) {
     return sv_trim_left(sv_trim_right(sv));
 }
 
-String_View sv_replace_str(String_View sv, 
-                           String_View find,
-                           String_View replace) {
+String_View readfile(const char *filepath) {
+    FILE *f = fopen(filepath, "r");
 
-    String_View choped = sv_chop_str(&sv, find);
-   
-    size_t new_len = choped.len + replace.len + sv.len;
-    char *new = malloc(new_len);
-    sprintf(new, SVFMT SVFMT SVFMT, SVARG(choped), SVARG(replace), SVARG(sv));
+    fseek(f, 0, SEEK_END);
+    long file_size = ftell(f);
+    fseek(f, 0, SEEK_SET);
 
-    return (String_View) {new, new_len};
+    char *contents = malloc(file_size + 1);
+
+    size_t bytes_read =
+        fread(contents, 1, file_size, f); 
+
+    assert(bytes_read == file_size);
+    contents[file_size] = 0;
+    fclose(f);
+    
+    return (String_View) {contents, file_size};
+}
+
+size_t sv_count_char(String_View sv, char c) {
+    int i = 0;
+    for (size_t j = 0; j < sv.len; j++) {
+        i += sv.str[j] == c ? 1 : 0;
+    }
+
+    return i;
+}
+
+int sv_find_char(String_View sv, char c) {
+    int i = 0;
+    while (i <= sv.len && sv.str[i] != c) {
+        i += 1;
+    }
+
+    return (i > sv.len) ? -1 : i;
+}
+
+String_View sv_chop_char(String_View *sv, char c) {
+    int i = sv_find_char(*sv, c);
+
+    if (i == -1) return *sv;
+
+    String_View choped = {sv->str, i};
+
+    sv->str = sv->str + i + 1;
+    sv->len = sv->len - i - 1;
+
+    return choped;
+}
+
+int sv_find_str(String_View sv, String_View find) {
+    size_t N = sv.len - find.len + 1;
+    for (size_t j = 0; j < N; j++) {
+        int needle = memcmp(find.str, sv.str + j, find.len);
+
+        if (!needle) 
+            return j;
+    }
+
+    return -1; 
+}
+
+String_View sv_chop_str(String_View *sv, String_View find) {
+    int index = sv_find_str(*sv, find);
+
+    if (index == -1) return *sv;
+
+    String_View result = {sv->str, index};
+    sv->str = sv->str + index + find.len;
+    sv->len = sv->len - index - find.len;
+
+    return result;
 }
 
 String_View *sv_replace_in_buffer(String_View *buffer,
@@ -147,32 +135,34 @@ String_View *sv_replace_in_buffer(String_View *buffer,
                                   String_View find,
                                   String_View replace) {
 
-    size_t N = buffer->len - string.len - replace.len + find.len;
-    assert(N >= 0);
+    int N = MAXSTR - string.len - replace.len + find.len;
+    assert(N > 0);
 
     String_View choped = sv_chop_str(&string, find);
-    sprintf((char *)buffer->str, SVFMT SVFMT SVFMT, SVARG(choped), SVARG(replace), SVARG(string));
     buffer->len = choped.len + replace.len + string.len;
+    sprintf((char *)buffer->str, SVFMT SVFMT SVFMT, SVARG(choped), SVARG(replace), SVARG(string));
     return buffer;
 }
 
-String_View parse_element(String_View str, char element) {
-    size_t nelem = sv_count_char(str, element); 
-    
-    String_View el = {(const char *) &element, 1};
-    char *new = malloc(MAXSTR);
-    
-    String_View u = {new, MAXSTR};
-    do {
-        if (nelem % 2 == 0) 
-            sv_replace_in_buffer(&u, str, el, sv("\\textbf{"));
+String_View *parse_in_buffer(String_View *buffer,
+                             String_View str,
+                             char marker) {
+
+    size_t nm = sv_count_char(str, marker); 
+    String_View m = {(const char *) &marker, 1};
+
+    while (nm) {
+        if (nm-- % 2 == 0) 
+            sv_replace_in_buffer(buffer, str, m, sv("\\textbf{"));
         else 
-            sv_replace_in_buffer(&u, str, el, sv("}"));
+            sv_replace_in_buffer(buffer, str, m, sv("}"));
+    
+        printf(SVFMT"\n", (int) buffer->len, buffer->str);
+        printf("-------\n");
+        str = *buffer;
+    } 
 
-        str = u;
-    } while(--nelem);
-
-    return u;
+    return buffer;
 }
 
 String_View exepath() {
