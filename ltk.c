@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 
 #include "ltk.h"
 
@@ -13,9 +14,8 @@ Memory memory = { .capacity = MAX_CAPACITY,
 int main() {
     const char *s = "This is a *test sentence* with bold.";
     String_View w = sv(s);
-    String_View nw = sv_replace_str(w, sv("*"), sv("\\textbf{"));
-    
-    printf(SVFMT, SVARG(nw));
+    String_View u = parse_element(w, '*');
+    printsv(u);
 
 #if 0
     String_View file = readfile("./test.md");

@@ -10,12 +10,8 @@
 
 #define VEC_INCREASE 10
 #define INITIAL_CAPACITY 20
-
-typedef struct Vector {
-    uint32_t *elem;
-    size_t size;
-    size_t capacity;
-} Vector;
+#define MAXPATH 256
+#define MAXSTR 256
 
 typedef struct String_View {
     const char *str;
@@ -25,42 +21,13 @@ typedef struct String_View {
 #define SVFMT "%.*s"
 #define SVARG(sv) (int) sv.len, sv.str
 
-Vector vector(size_t capacity) {
-    uint32_t *elem = malloc(capacity * sizeof(uint32_t));
-    memset(elem, 0, capacity * sizeof(uint32_t));
-    return (Vector) {elem, 0, capacity};
-}
-
-Vector *vec_push(Vector *vec, uint32_t i) {
-    if (vec->capacity >= vec->size + 1) {
-        vec->elem[vec->size++] = i;
-    } else {
-        vec->elem = realloc(vec->elem, (vec->capacity + VEC_INCREASE) * sizeof(uint32_t));
-        vec->capacity = vec->capacity + VEC_INCREASE;
-        vec->elem[vec->size++] = i;
-    }
-
-    return vec;
-}
-
-void vec_free(Vector *vec) {
-    free(vec->elem);
-}
-
 String_View sv(const char *cstr) {
     size_t N  = strlen(cstr);
     return (String_View) {cstr, N};
 }
 
-Vector sv_find_all(String_View sv, char c) {
-    Vector indexes = vector(INITIAL_CAPACITY);
-
-    for (size_t i = 0; i < sv.len; i++) {
-       if (sv.str[i] == c) 
-           vec_push(&indexes, i);
-    }
-
-    return indexes;
+void printsv(String_View sv) {
+    printf(SVFMT"\n", SVARG(sv));
 }
 
 void sv_free(String_View *str) {
@@ -173,6 +140,47 @@ String_View sv_replace_str(String_View sv,
     sprintf(new, SVFMT SVFMT SVFMT, SVARG(choped), SVARG(replace), SVARG(sv));
 
     return (String_View) {new, new_len};
+}
+
+String_View *sv_replace_in_buffer(String_View *buffer,
+                                  String_View string,
+                                  String_View find,
+                                  String_View replace) {
+
+    size_t N = buffer->len - string.len - replace.len + find.len;
+    assert(N >= 0);
+
+    String_View choped = sv_chop_str(&string, find);
+    sprintf((char *)buffer->str, SVFMT SVFMT SVFMT, SVARG(choped), SVARG(replace), SVARG(string));
+    buffer->len = choped.len + replace.len + string.len;
+    return buffer;
+}
+
+String_View parse_element(String_View str, char element) {
+    size_t nelem = sv_count_char(str, element); 
+    
+    String_View el = {(const char *) &element, 1};
+    char *new = malloc(MAXSTR);
+    
+    String_View u = {new, MAXSTR};
+    do {
+        if (nelem % 2 == 0) 
+            sv_replace_in_buffer(&u, str, el, sv("\\textbf{"));
+        else 
+            sv_replace_in_buffer(&u, str, el, sv("}"));
+
+        str = u;
+    } while(--nelem);
+
+    return u;
+}
+
+String_View exepath() {
+    char *path = malloc(MAXPATH); 
+    int bytes = readlink("/proc/self/exe", path, MAXPATH);
+    assert(bytes != -1);
+    path[bytes] = 0;
+    return (String_View) {path, strlen(path)};
 }
 
 #endif // LTK_H
