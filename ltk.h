@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
@@ -26,8 +27,13 @@ String_View sv(const char *cstr) {
     return (String_View) {cstr, N};
 }
 
-void printsv(String_View sv) {
+void sv_print(String_View sv) {
     printf(SVFMT"\n", SVARG(sv));
+}
+
+void sv_fprintf(FILE *stream, String_View sv) {
+    assert(stream);
+    fprintf(stream, SVFMT, SVARG(sv));
 }
 
 void sv_free(String_View str) {
@@ -63,13 +69,13 @@ String_View sv_trim(String_View sv) {
     return sv_trim_left(sv_trim_right(sv));
 }
 
-int sv_eq(String_View a, String_View b) {
+bool sv_eq(String_View a, String_View b) {
     if (a.len != b.len)
-        return 0;
+        return false;
     else if (!memcmp(a.str, b.str, a.len)) 
-        return 1; 
+        return true; 
     else 
-        return 0;
+        return false;
 }
 
 String_View readfile(const char *filepath) {
@@ -127,7 +133,10 @@ String_View sv_getline(String_View *sv) {
 }
 
 int sv_find_str(String_View sv, String_View find) {
-    size_t N = sv.len - find.len + 1;
+    int N = sv.len - find.len + 1;
+    if (N < 0)
+        return -1;
+
     for (size_t j = 0; j < N; j++) {
         int needle = memcmp(find.str, sv.str + j, find.len);
 
@@ -184,8 +193,8 @@ String_View *parse_in_buffer(String_View *buffer,
 
     char temp[KILO];
     String_View holder = {temp, KILO};
+    
     sv_copy(&holder, &str);
-
     while (nm) {
         if (nm-- % 2 == 0) 
             sv_replace_in_buffer(buffer, holder, marker, sv("\\textbf{"));
