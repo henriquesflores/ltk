@@ -3,15 +3,15 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include <ctype.h>
+#include <unistd.h>
 
-#define VEC_INCREASE 10
-#define INITIAL_CAPACITY 20
-#define MAXPATH 256
-#define MAXSTR (2 * 1024)
+#define KILO (1024LL)
+#define MEGA (KILO * 1024LL)
+#define GIGA (MEGA * 1024LL)
 
 typedef struct String_View {
     const char *str;
@@ -30,8 +30,15 @@ void printsv(String_View sv) {
     printf(SVFMT"\n", SVARG(sv));
 }
 
-void sv_free(String_View *str) {
-    free((char *)str->str);
+void sv_free(String_View str) {
+    free((char *)str.str);
+}
+
+String_View *sv_copy(String_View *dest, String_View *src) {
+    dest->len = src->len;
+    memcpy((char *)dest->str, src->str, src->len);
+
+    return dest;
 }
 
 String_View sv_trim_left(String_View sv) {
@@ -54,13 +61,6 @@ String_View sv_trim_right(String_View sv) {
 
 String_View sv_trim(String_View sv) {
     return sv_trim_left(sv_trim_right(sv));
-}
-
-String_View *sv_copy(String_View *dest, String_View *src) {
-    dest->len = src->len;
-    memcpy((char *)dest->str, src->str, src->len);
-
-    return dest;
 }
 
 int sv_eq(String_View a, String_View b) {
@@ -122,6 +122,10 @@ String_View sv_chop_char(String_View *sv, char c) {
     return choped;
 }
 
+String_View sv_getline(String_View *sv) {
+    return sv_chop_char(sv, '\n');
+}
+
 int sv_find_str(String_View sv, String_View find) {
     size_t N = sv.len - find.len + 1;
     for (size_t j = 0; j < N; j++) {
@@ -156,12 +160,13 @@ String_View *sv_replace_in_buffer(String_View *buffer,
         return buffer;
 
     buffer->len = choped.len + replace.len + string.len;
-    sprintf( (char *)buffer->str
-           , SVFMT SVFMT SVFMT
-           , SVARG(choped)
-           , SVARG(replace)
-           , SVARG(string)
-           ); 
+    snprintf( (char *)buffer->str
+            , buffer->len + 1
+            , SVFMT SVFMT SVFMT
+            , SVARG(choped)
+            , SVARG(replace)
+            , SVARG(string)
+            ); 
 
     return buffer;
 }
@@ -172,8 +177,13 @@ String_View *parse_in_buffer(String_View *buffer,
     
     size_t nm = sv_count_char(str, *marker.str); 
 
-    char temp[MAXSTR];
-    String_View holder = {temp, MAXSTR};
+    if (!nm) {
+        sv_copy(buffer, &str);
+        return buffer;
+    }
+
+    char temp[KILO];
+    String_View holder = {temp, KILO};
     sv_copy(&holder, &str);
 
     while (nm) {
@@ -188,12 +198,10 @@ String_View *parse_in_buffer(String_View *buffer,
     return buffer;
 }
 
-String_View exepath() {
-    char *path = malloc(MAXPATH); 
-    int bytes = readlink("/proc/self/exe", path, MAXPATH);
+String_View *exepath(String_View *path) {
+    int bytes = readlink("/proc/self/exe", (char *)path->str, path->len);
     assert(bytes != -1);
-    path[bytes] = 0;
-    return (String_View) {path, strlen(path)};
+    return path;
 }
 
 #endif // LTK_H
