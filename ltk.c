@@ -14,15 +14,13 @@ Memory memory = { .capacity = MAX_CAPACITY,
 int main() {
     String_View s = sv(
     "This is a *test sentence* with bold and *this is another bold*."
-    "Continuing like this we obtain another *bold sentence* that"
-    "could generate *errors*. Maybe... who knows"
     );
 
-    char buffer[MAXSTR];
-    String_View sv_buffer = {buffer, MAXSTR};
-    parse_in_buffer(&sv_buffer, s, '*');
-    printsv(s);
-    printsv(sv_buffer);
+    char global_buffer[MAXSTR] = {0};
+    String_View gb = {global_buffer, MAXSTR};
+
+    parse_in_buffer(&gb, s, sv("*"));
+    printsv(gb);
 
  #if 0
     String_View file = readfile("./t1.md");

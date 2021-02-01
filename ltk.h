@@ -56,6 +56,22 @@ String_View sv_trim(String_View sv) {
     return sv_trim_left(sv_trim_right(sv));
 }
 
+String_View *sv_copy(String_View *dest, String_View *src) {
+    dest->len = src->len;
+    memcpy((char *)dest->str, src->str, src->len);
+
+    return dest;
+}
+
+int sv_eq(String_View a, String_View b) {
+    if (a.len != b.len)
+        return 0;
+    else if (!memcmp(a.str, b.str, a.len)) 
+        return 1; 
+    else 
+        return 0;
+}
+
 String_View readfile(const char *filepath) {
     FILE *f = fopen(filepath, "r");
 
@@ -134,34 +150,41 @@ String_View *sv_replace_in_buffer(String_View *buffer,
                                   String_View string,
                                   String_View find,
                                   String_View replace) {
+    
+    String_View choped = sv_chop_str(&string, find);    
+    if (sv_eq(choped, string))
+        return buffer;
 
-    int N = MAXSTR - string.len - replace.len + find.len;
-    assert(N > 0);
-
-    String_View choped = sv_chop_str(&string, find);
     buffer->len = choped.len + replace.len + string.len;
-    sprintf((char *)buffer->str, SVFMT SVFMT SVFMT, SVARG(choped), SVARG(replace), SVARG(string));
+    sprintf( (char *)buffer->str
+           , SVFMT SVFMT SVFMT
+           , SVARG(choped)
+           , SVARG(replace)
+           , SVARG(string)
+           ); 
+
     return buffer;
 }
 
 String_View *parse_in_buffer(String_View *buffer,
                              String_View str,
-                             char marker) {
+                             String_View marker) {
+    
+    size_t nm = sv_count_char(str, *marker.str); 
 
-    size_t nm = sv_count_char(str, marker); 
-    String_View m = {(const char *) &marker, 1};
+    char temp[MAXSTR];
+    String_View holder = {temp, MAXSTR};
+    sv_copy(&holder, &str);
 
     while (nm) {
         if (nm-- % 2 == 0) 
-            sv_replace_in_buffer(buffer, str, m, sv("\\textbf{"));
+            sv_replace_in_buffer(buffer, holder, marker, sv("\\textbf{"));
         else 
-            sv_replace_in_buffer(buffer, str, m, sv("}"));
+            sv_replace_in_buffer(buffer, holder, marker, sv("}"));
     
-        printf(SVFMT"\n", (int) buffer->len, buffer->str);
-        printf("-------\n");
-        str = *buffer;
+        sv_copy(&holder, buffer); 
     } 
-
+    
     return buffer;
 }
 
