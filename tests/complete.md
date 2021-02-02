@@ -1,7 +1,7 @@
 ---
-#title: This is a good title
-#author: I'm the author
-#date: today
+title: This is a good title
+author: I'm the author
+date: today
 ---
 
 ## Introduction
