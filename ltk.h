@@ -47,6 +47,20 @@ String_View *sv_copy(String_View *dest, String_View *src) {
     return dest;
 }
 
+bool sv_eq(String_View a, String_View b) {
+    if (a.len != b.len)
+        return false;
+    else if (!memcmp(a.str, b.str, a.len)) 
+        return true; 
+    else 
+        return false;
+}
+
+bool sv_isempty(String_View sv) {
+    String_View empty_str = {"", 0};
+    return sv_eq(empty_str, sv);
+}
+
 String_View sv_trim_left(String_View sv) {
     size_t i = 0;
     while (i < sv.len && isspace(sv.str[i])) {
@@ -67,15 +81,6 @@ String_View sv_trim_right(String_View sv) {
 
 String_View sv_trim(String_View sv) {
     return sv_trim_left(sv_trim_right(sv));
-}
-
-bool sv_eq(String_View a, String_View b) {
-    if (a.len != b.len)
-        return false;
-    else if (!memcmp(a.str, b.str, a.len)) 
-        return true; 
-    else 
-        return false;
 }
 
 String_View readfile(const char *filepath) {

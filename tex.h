@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "ltk.h"
 
-enum Note_Type {
+enum Doctype {
     NOTE = 0,
     ARTICLE,
 };
@@ -12,37 +12,24 @@ enum Note_Type {
 typedef struct Yml {
     bool date;
     uint8_t letter;
-    enum Note_Type type;
+    enum Doctype type;
     String_View title;
     String_View author;
 } Yml;
-
-bool has_yml(String_View s) {
-    sv_chop_str(&s, sv("---"));
-    sv_getline(&s);
-    String_View choped = sv_chop_str(&s, sv("---"));
-
-    if (sv_eq(choped, s)) 
-        return false;
-    else
-        return true;
-}
-
-//String_View yml_extract(String_View sv) { }
 
 Yml *yml_date(Yml *y, String_View file);
 Yml *yml_letter(Yml *y, String_View file);
 Yml *yml_type(Yml *y, String_View file);
 Yml *yml_title(Yml *y, String_View file);
 Yml *yml_author(Yml *y, String_View file);
+Yml *yml_parse(Yml *y, String_View file);
+String_View yml_extract(String_View file);
 
 Yml *yml_date(Yml *y, String_View file) {
     String_View choped = sv_chop_str(&file, sv("date:"));
     
-    if (sv_eq(choped, file)) {
-        y->date = false;
+    if (sv_eq(choped, file)) 
         return y;
-    }
 
     String_View has_date = sv_trim(sv_getline(&file));
     if (sv_eq(has_date, sv("true")))
@@ -56,25 +43,19 @@ Yml *yml_date(Yml *y, String_View file) {
 Yml *yml_letter(Yml *y, String_View file) {
     String_View choped = sv_chop_str(&file, sv("letter:"));
 
-    if (sv_eq(choped, file)) {
-        y->letter = 10;
+    if (sv_eq(choped, file)) 
         return y;
-    }
 
-    uint8_t n;
     String_View has_letter = sv_trim(sv_getline(&file));
-    sscanf(has_letter.str, "%hhd", &n);
-    y->letter = n;
+    sscanf(has_letter.str, "%hhd",  &y->letter);
     return y;
 }
 
 Yml *yml_type(Yml *y, String_View file) {
     String_View choped = sv_chop_str(&file, sv("type:"));
 
-    if (sv_eq(choped, file)) {
-        y->type = NOTE;
+    if (sv_eq(choped, file))
         return y;
-    }
 
     String_View has_type = sv_trim(sv_getline(&file));
     if (sv_eq(has_type, sv("note"))) 
@@ -88,10 +69,8 @@ Yml *yml_type(Yml *y, String_View file) {
 Yml *yml_title(Yml *y, String_View file) {
     String_View choped = sv_chop_str(&file, sv("title:"));
 
-    if (sv_eq(choped, file)) {
-        y->title = (String_View) {NULL, 0};
+    if (sv_eq(choped, file)) 
         return y;
-    }
 
     String_View title = sv_trim(sv_getline(&file));
     y->title = title;
@@ -101,15 +80,39 @@ Yml *yml_title(Yml *y, String_View file) {
 Yml *yml_author(Yml *y, String_View file) {
     String_View choped = sv_chop_str(&file, sv("author:"));
 
-    if (sv_eq(choped, file)) {
-        y->author = (String_View) {NULL, 0};
+    if (sv_eq(choped, file))
         return y;
-    }
 
     String_View author = sv_trim(sv_getline(&file));
     y->author = author;
     return y;
 }
+
+String_View yml_extract(String_View file) { 
+    sv_chop_str(&file, sv("---"));
+    sv_getline(&file);
+    String_View yml_environ = sv_chop_str(&file, sv("---"));
+    
+    if (sv_eq(yml_environ, file)) 
+        return (String_View) {NULL, 0};
+    else
+        return yml_environ;
+}
+
+Yml *yml_parse(Yml *y, String_View file) {
+    String_View yml_env = yml_extract(file);
+    
+    if (sv_isempty(yml_env))
+        return y;
+
+    yml_date(y, yml_env);
+    yml_letter(y, yml_env);
+    yml_type(y, yml_env);
+    yml_title(y, yml_env);
+    yml_author(y, yml_env);
+}
+
+//void yml_dumptex(Yml *y, FILE *f) {}
 
 static char *tex_documentclass = "\\documentclass[x]{y}";
 static char *tex_begindoc      = "\\begin{document}\n";
@@ -134,15 +137,15 @@ static char *tex_packages      =
 "\n"
 "\\numberwithin{equation}{section}\n"
 "\n"
-"\\newtheoremstyle{henrique}      %% Name\n"
-"  { }                            %% Space above\n"
-"  {}                             %% Space below\n"
-"  {\normalfont}                  %% Body font\n"
-"  {}                             %% Indent amount\n"
-"  {\bfseries}                    %% Theorem head font\n"
-"  {.}                            %% Punctuation after theorem head\n"
-"  { }                            %% Space after theorem head, ' ', or \\newline\n"
-"  {}                             %% Theorem head spec (can be left empty, meaning `normal')\n"
+"\\newtheoremstyle{henrique}        % Name\n"
+"  { }                             % Space above\n"
+"  {}                              % Space below\n"
+"  {\\normalfont}                   % Body font\n"
+"  {}                              % Indent amount\n"
+"  {\\bfseries}                     % Theorem head font\n"
+"  {.}                             % Punctuation after theorem head\n"
+"  { }                             % Space after theorem head, ' ', or \\newline\n"
+"  {}                              % Theorem head spec (can be left empty, meaning `normal')\n"
 "\\theoremstyle{henrique}\n"
 "\\newtheorem{teo}{Theorem}[section]\n"
 "\\newtheorem{defi}{Definition}[section]\n"

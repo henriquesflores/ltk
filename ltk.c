@@ -4,55 +4,61 @@
 #include "tex.h"
 
 void usage();
+
 static char global_buffer[KILO] = {0};
 static String_View gb = {global_buffer, KILO};
 
-Yml yml;
-int main() {
-    String_View file = readfile("./t1.md");
-    
-    bool hasit = has_yml(file);
-    yml_date(&yml, file);
-    yml_letter(&yml, file);
-    yml_type(&yml, file);
-    yml_title(&yml, file);
-    yml_author(&yml, file);
+static
+Yml yml = {
+    .date   = false,
+    .letter = 10,
+    .type   = NOTE,
+    .title  = {NULL, 0},
+    .author = {NULL, 0}
+};
 
+int main() {
+
+    String_View file = readfile("./tests/yml.md");
+    yml_parse(&yml, file);
     sv_free(file);
+
+#if 0
+#endif
+    
     return 0;
 }
 
 void usage() {
-#if 0 
-    Need to parse Yml with the following fields:
-        Bool date: true
-        enum note type: notes
-        int8_t letter_size: 12
-        String_View title: My awesome notes
-        String_View author: My awesome name
-#endif
-    const char *u = 
-    "ltk - Markdown LaTeX converter\n"
+    // TODO: Write complete documentation. 
+        const char *u = 
+    "ltk - Markdown LaTeX converter:\n"
     "ltk parses the markdown and compiles the latex using pdflatex\n"
+    "Need to parse Yml with the following fields:\n"
+    "   Bool date: true\n"
+    "   enum note type: notes\n"
+    "   int8_t letter_size: 12\n"
+    "   String_View title: empty\n"
+    "   String_View author: empty\n" 
     "Available packages:\n"
-    "\\usepackage[a4paper, margin=2cm]{geometry}\n"
-    "\\usepackage[utf8]{inputenc}\n"
-    "\\usepackage[T1]{fontenc}\n"
-    "\\usepackage{hyperref}\n"
-    "\\usepackage{amsmath}\n"
-    "\\usepackage{amsfonts}\n"
-    "\\usepackage{amssymb}\n"
-    "\\usepackage{amsthm}\n"
-    "\\usepackage{amsbsy}\n"
-    "\\usepackage{mathrsfs}\n"
-    "\\usepackage{slashed}\n"
-    "\\usepackage{graphicx}\n"
-    "\\usepackage{fancyhdr}\n"
-    "\\usepackage{color}\n"
-    "\\usepackage{cite}\n"
-    "\\usepackage{float}\n";
+    "\t\\usepackage[a4paper, margin=2cm]{geometry}\n"
+    "\t\\usepackage[utf8]{inputenc}\n"
+    "\t\\usepackage[T1]{fontenc}\n"
+    "\t\\usepackage{hyperref}\n"
+    "\t\\usepackage{amsmath}\n"
+    "\t\\usepackage{amsfonts}\n"
+    "\t\\usepackage{amssymb}\n"
+    "\t\\usepackage{amsthm}\n"
+    "\t\\usepackage{amsbsy}\n"
+    "\t\\usepackage{mathrsfs}\n"
+    "\t\\usepackage{slashed}\n"
+    "\t\\usepackage{graphicx}\n"
+    "\t\\usepackage{fancyhdr}\n"
+    "\t\\usepackage{color}\n"
+    "\t\\usepackage{cite}\n"
+    "\t\\usepackage{float}\n";
 
-    printf("%s\n", u);
+    puts(u);
 }
 
 
