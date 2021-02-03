@@ -18,13 +18,11 @@ typedef struct Yml {
 } Yml;
 
 Yml *yml_date(Yml *y, String_View file) {
-    String_View choped = sv_chop_str(&file, sv("date:"));
-    
-    if (sv_eq(choped, file)) 
-        return y;
+    String_View date = sv_take_between(&file, sv("date:"), sv("\n"));
 
-    String_View has_date = sv_trim(sv_getline(&file));
-    if (sv_eq(has_date, sv("true")))
+    if (sv_eq(date, file)) 
+        return y;
+    else if (sv_eq(date, sv("true")))
         y->date = true;
     else
         y->date = false;
@@ -33,73 +31,67 @@ Yml *yml_date(Yml *y, String_View file) {
 }
 
 Yml *yml_toc(Yml *y, String_View file) {
-    String_View choped = sv_chop_str(&file, sv("toc:"));
+    String_View tc = sv_take_between(&file, sv("toc:"), sv("\n"));
     
-    if (sv_eq(choped, file))
+    if (sv_eq(tc, file))
         return y;
-
-    String_View has_toc = sv_trim(sv_getline(&file));
-    if (sv_eq(has_toc, sv("true")))
-            y->toc = true;
+    else if (sv_eq(tc, sv("true")))
+        y->toc = true;
     else
-            y->toc = false;
+        y->toc = false;
 
 
     return y;
 }
 
 Yml *yml_letter(Yml *y, String_View file) {
-    String_View choped = sv_chop_str(&file, sv("letter:"));
+    String_View ltr = sv_take_between(&file, sv("letter:"), sv("\n"));
 
-    if (sv_eq(choped, file)) 
+    if (sv_eq(ltr, file)) 
         return y;
+    else
+        y->letter = ltr; 
 
-    y->letter = sv_trim(sv_getline(&file));
     return y;
 }
 
 Yml *yml_type(Yml *y, String_View file) {
-    String_View choped = sv_chop_str(&file, sv("type:"));
+    String_View type = sv_take_between(&file, sv("type:"), sv("\n"));
 
-    if (sv_eq(choped, file))
+    if (sv_eq(type, file))
         return y;
-
-    String_View has_type = sv_trim(sv_getline(&file));
-    if (sv_eq(has_type, sv("note"))) 
+    else if (sv_eq(type, sv("note"))) 
         y->type = NOTE;
-    else if (sv_eq(has_type, sv("article")))
+    else if (sv_eq(type, sv("article")))
         y->type = ARTICLE;
 
     return y;
 }
 
 Yml *yml_title(Yml *y, String_View file) {
-    String_View choped = sv_chop_str(&file, sv("title:"));
+    String_View ttl = sv_take_between(&file, sv("title:"), sv("\n"));
 
-    if (sv_eq(choped, file)) 
+    if (sv_eq(ttl, file)) 
         return y;
+    else 
+        y->title = ttl;
 
-    String_View title = sv_trim(sv_getline(&file));
-    y->title = title;
     return y;
 }
 
 Yml *yml_author(Yml *y, String_View file) {
-    String_View choped = sv_chop_str(&file, sv("author:"));
+    String_View atr = sv_take_between(&file, sv("author:"), sv("\n"));
 
-    if (sv_eq(choped, file))
+    if (sv_eq(atr, file))
         return y;
+    else 
+        y->author = atr;
 
-    String_View author = sv_trim(sv_getline(&file));
-    y->author = author;
     return y;
 }
 
 String_View yml_extract(String_View *file) { 
-    sv_chop_str(file, sv("---"));
-    sv_getline(file);
-    String_View yml_environ = sv_chop_str(file, sv("---"));
-    
+    String_View yml_environ = sv_take_between(file, sv("---"), sv("---"));
     if (sv_eq(yml_environ, *file)) 
         return (String_View) {NULL, 0};
     else

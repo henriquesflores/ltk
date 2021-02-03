@@ -8,6 +8,7 @@
 #include "tex.h"
 
 void usage();
+void mount_tex_file();
 
 static char global_buffer[BUFFERMAX] = {0};
 static char holder_buffer[BUFFERMAX] = {0};
@@ -34,52 +35,49 @@ Cmd cmd = {
     .tex_close = (String_View) {NULL, 0},
 };
 
-FILE *open_tex(String_View md_filename) {
-        String_View file_name = sv_chop_str(&md_filename, sv(".md")); 
-        sv_append_in_buffer(pgb, file_name, sv(".tex"));
-        FILE *out = fopen(gb.str, "w");
-        return out;
-}
 
 int main(size_t argc, char **argv) {
 
-
     if (argc == 2) {
-        String_View md_file = sv(argv[1]);
+        String_View input = sv(argv[1]);
+        mount_tex_file(input);
 
-        String_View file = readfile(md_file);
-        FILE *out = open_tex(md_file);
+        getcwd((char *)hb.str, KILO);
+        hb.len = strlen(hb.str);
 
-        yml_parse(&yml, &file);
-        tex_init(&yml, out);
-        
-        String_View md = sv_trim_left(file);
-        tex_parse(pgb, phb, &cmd, md);
-        fprintf(out, SVFMT, SVARG(gb));
-//        tex_end(out);
-        
-        fclose(out);
+        String_View filename = sv_chop_str(&input, sv(".md"));
+        char tt[KILO];
+        String_View texfile = {tt, KILO};
+        sv_append_in_buffer(&texfile, filename, sv(".tex"));
+        sv_append_in_buffer(pgb, hb, sv("/"));
+        sv_copy(phb, pgb);
+        sv_append_in_buffer(pgb, hb, texfile);
+        execl("/usr/bin/pdflatex", "/usr/bin/pdflatex", gb.str, (char *) NULL);
     }
 
-    
-#if 0
-    String_View file = readfile("../tests/bold_it.md");
+    printf(SVFMT, SVARG(hb));
 
-    parse_in_buffer(pgb, file, cmd_bf(&cmd));
-    sv_copy(phb, pgb);
-    parse_in_buffer(pgb, hb, cmd_it(&cmd));
-    sv_print(gb);
 
-    sv_free(file);
-
-    yml_parse(&yml, file);
-    FILE *fout = fopen("out.tex", "w");
-    tex_init(&yml, fout);
-    fclose(fout);
-#endif
-    
     return 0;
 }
+
+void mount_tex_file(String_View md_file) {
+    String_View file = readfile(md_file);
+    char *ptr_tofree = (char *)file.str;
+    
+    FILE *out = tex_openfile(md_file);
+    yml_parse(&yml, &file);
+    tex_init(&yml, out, pgb, phb);
+    
+    String_View md = sv_trim_left(file);
+    tex_parse(pgb, phb, &cmd, md);
+    fprintf(out, SVFMT, SVARG(gb));
+    tex_end(out);
+    
+    fclose(out);
+    free(ptr_tofree);
+}
+
 
 void usage() {
     // TODO: Write complete documentation. 

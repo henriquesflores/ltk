@@ -6,6 +6,9 @@ run: ltk.c
 	$(CC) -o ltk ltk.c
 	./ltk
 
+test: run
+	./ltk complete.md
+
 ltk: ltk.c
 	$(CC) $(COMMONFLAGS) -o ltk ltk.c
 	./ltk

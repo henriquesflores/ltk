@@ -21,6 +21,7 @@ typedef struct String_View {
 
 #define SVFMT "%.*s"
 #define SVARG(sv) (int) sv.len, sv.str
+#define SV_PTRARG(psv) (int) psv->len, psv->str
 
 String_View sv(const char *cstr) {
     size_t N  = strlen(cstr);
@@ -53,10 +54,10 @@ String_View *sv_copy(String_View *dest, String_View *src) {
 bool sv_eq(String_View a, String_View b) {
     if (a.len != b.len)
         return false;
-    else if (!memcmp(a.str, b.str, a.len)) 
-        return true; 
+    else if (memcmp(a.str, b.str, a.len)) 
+        return false; 
     else 
-        return false;
+        return true;
 }
 
 bool sv_isempty(String_View sv) {
@@ -131,7 +132,7 @@ String_View sv_chop_char(String_View *sv, char c) {
 
     if (i == -1) return *sv;
 
-    String_View choped = {sv->str, i + 1};
+    String_View choped = {sv->str, i};
 
     sv->str = sv->str + i + 1;
     sv->len = sv->len - i - 1;
@@ -184,11 +185,29 @@ String_View sv_chop_str(String_View *sv, String_View find) {
     return result;
 }
 
+
+String_View sv_take_between(String_View *sv, 
+                            String_View begin, 
+                            String_View end) {
+
+    String_View init = *sv;
+
+    String_View prev  = sv_chop_str(sv, begin);
+    if (sv_eq(prev, *sv))
+        return init;
+
+    String_View field = sv_chop_str(sv, end);
+    if (sv_eq(field, *sv))
+        return init;
+
+    return sv_trim(field);
+}
+
 String_View *sv_append_in_buffer(String_View *buffer, 
                                  String_View sv1, 
                                  String_View sv2) {
 
-    assert(buffer->len >= sv1.len + sv2.len);
+//    assert(buffer->len >= sv1.len + sv2.len);
     buffer->len = sv1.len + sv2.len;
     snprintf( (char *)buffer->str
             , buffer->len + 1
@@ -219,6 +238,41 @@ String_View *sv_replace_in_buffer(String_View *buffer,
 
     return buffer;
 }
+
+String_View *sv_replace_between_in_buffer(
+        String_View *buffer,
+        String_View string,
+        String_View start,
+        String_View end,
+        String_View replace
+) {
+
+    String_View init   = string;
+    String_View before = sv_chop_str(&string, start);
+    if (sv_eq(before, string)) {
+        sv_copy(buffer, &init);
+        return buffer;
+    }
+    
+
+    String_View middle = sv_chop_str(&string, end);
+    if (sv_eq(middle, string)) {
+        sv_copy(buffer, &init);
+        return buffer;
+    }
+    
+    buffer->len = before.len + string.len + replace.len;
+    snprintf( (char *)buffer->str
+            , buffer->len + 1
+            , SVFMT SVFMT SVFMT
+            , SVARG(before)
+            , SVARG(replace)
+            , SVARG(string)
+            );
+
+    return buffer;
+}
+                                           
 
 String_View *exepath(String_View *path) {
     int bytes = readlink("/proc/self/exe", (char *)path->str, path->len);

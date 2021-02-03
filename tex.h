@@ -120,17 +120,24 @@ Cmd *cmd_equation(Cmd *cmd) {
     return cmd;
 }
 
-void tex_init(Yml *y, FILE *tex_file) {
+FILE *tex_openfile(String_View md_filename) {
+        char bf[KILO];
+        String_View b = {bf, KILO};
+        
+        String_View file_name = sv_chop_str(&md_filename, sv(".md")); 
+        sv_append_in_buffer(&b, file_name, sv(".tex"));
+        FILE *out = fopen(b.str, "w");
+        return out;
+}
+
+FILE *tex_init(Yml *y, 
+               FILE *tex_file,
+               String_View *buffer1, 
+               String_View *buffer2) {
+
     assert(tex_file);
-
-    char b1[BUFFERMAX];
-    String_View buffer1 = {b1, BUFFERMAX};
-
-    char b2[BUFFERMAX];
-    String_View buffer2 = {b2, BUFFERMAX};
-
-    sv_append_in_buffer(&buffer1, y->letter, sv("pt"));
-    sv_replace_in_buffer(&buffer2, sv(tex_documentclass), sv("x"), buffer1);
+    sv_append_in_buffer(buffer1, y->letter, sv("pt"));
+    sv_replace_in_buffer(buffer2, sv(tex_documentclass), sv("x"), *buffer1);
    
     String_View doc_type;
     // TODO: doctype is entangled with document format. 
@@ -149,15 +156,15 @@ void tex_init(Yml *y, FILE *tex_file) {
         } break;
     }
 
-    sv_copy(&buffer1, &buffer2);
-    sv_replace_in_buffer(&buffer2, buffer1, sv("y"), doc_type);
-    fprintf(tex_file, SVFMT"\n", SVARG(buffer2));
+    sv_copy(buffer1, buffer2);
+    sv_replace_in_buffer(buffer2, *buffer1, sv("y"), doc_type);
+    fprintf(tex_file, SVFMT"\n", SV_PTRARG(buffer2));
     fputs(tex_packages, tex_file);
     fputs("\n\n", tex_file);
-    sv_replace_in_buffer(&buffer1, sv(tex_title),  sv("x"), y->title);
-    sv_replace_in_buffer(&buffer2, sv(tex_author), sv("x"), y->author);
-    fprintf(tex_file, SVFMT"\n", SVARG(buffer1));
-    fprintf(tex_file, SVFMT"\n", SVARG(buffer2));
+    sv_replace_in_buffer(buffer1, sv(tex_title),  sv("x"), y->title);
+    sv_replace_in_buffer(buffer2, sv(tex_author), sv("x"), y->author);
+    fprintf(tex_file, SVFMT"\n", SV_PTRARG(buffer1));
+    fprintf(tex_file, SVFMT"\n", SV_PTRARG(buffer2));
 
     if (y->date) {
         fputs("\\date{}\n", tex_file);
@@ -170,7 +177,7 @@ void tex_init(Yml *y, FILE *tex_file) {
     switch (y->type) {
         case NOTE: {
             fprintf(tex_file, "\\begin{center}\n");
-            fprintf(tex_file, "\\Large{\\textbf{"SVFMT"}}\n", SVARG(y->title));
+            fprintf(tex_file, "\\Large{\\textbf{"SVFMT"}}\n\\\\\n", SVARG(y->title));
             fprintf(tex_file, SVFMT"\n", SVARG(y->author));
             fprintf(tex_file, "\\end{center}\n");
             fputs("\n", tex_file);
@@ -191,6 +198,8 @@ void tex_init(Yml *y, FILE *tex_file) {
         fputs(tex_toc, tex_file);
         fputs("\n", tex_file);
     }
+
+    return tex_file;
 }
 
 void tex_end(FILE *tex_file) {
@@ -228,26 +237,23 @@ String_View *parse_in_buffer(String_View *buffer,
     return buffer;
 }
 
-String_View *parse_environs(String_View *buffer,
-                            String_View str,
-                            Cmd *cmd) {
+String_View *parse_headers(String_View *buffer1,
+                           String_View *buffer2,
+                           String_View str,
+                           Cmd *cmd) {
 
+    char header[KILO];
+    String_View h = {header, KILO};
+    sv_copy(buffer1, &str);
     size_t count = sv_count_str(str, cmd->md_open);
-
-    if (!count) 
-        return buffer;
-
-    char h[BUFFERMAX] = {0};
-    String_View helper = {h, BUFFERMAX};
-
-    sv_copy(buffer, &str);
-    for (size_t j = 0; j < count; j++) {
-        sv_replace_in_buffer(&helper, *buffer, cmd->md_open, cmd->tex_open);
-        sv_replace_in_buffer( buffer,  helper, cmd->md_close, cmd->tex_close);
-        sv_copy(&helper, buffer);
+    while (count--) {
+        String_View field = sv_take_between(&str, cmd->md_open, cmd->md_close);
+        sv_replace_in_buffer(&h, sv(tex_section), sv("x"), field);
+        sv_replace_between_in_buffer(buffer2, *buffer1, sv("##"), sv("\n"), h);
+        sv_copy(buffer1, buffer2);
     }
 
-    return buffer;
+    return buffer1;
 }
 
 void tex_parse(String_View *gbuffer, 
@@ -256,11 +262,11 @@ void tex_parse(String_View *gbuffer,
                String_View file) {
 
     cmd_section(cmd);
-    parse_environs(hbuffer, file, cmd);
+    parse_headers(hbuffer, gbuffer, file, cmd);
     sv_copy(gbuffer, hbuffer);
 
     cmd_subsection(cmd);
-    parse_environs(hbuffer, *gbuffer, cmd);
+    parse_headers(hbuffer, gbuffer, *gbuffer, cmd);
     sv_copy(gbuffer, hbuffer);
     
     cmd_equation(cmd);
@@ -268,6 +274,10 @@ void tex_parse(String_View *gbuffer,
     sv_copy(gbuffer, hbuffer);
 
     cmd_bf(cmd);
+    parse_in_buffer(hbuffer, *gbuffer, cmd);
+    sv_copy(gbuffer, hbuffer);
+
+    cmd_it(cmd);
     parse_in_buffer(hbuffer, *gbuffer, cmd);
     sv_copy(gbuffer, hbuffer);
 
@@ -294,9 +304,9 @@ static char *tex_maketitle     = "\\maketitle\n";
 static char *tex_toc           = "\\tableofcontents\n";
 static char *tex_author        = "\\author{x}\n";
 static char *tex_date          = "\\date{}\n";
-static char *tex_section       = "\\section{";
-static char *tex_subsection    = "\\subsection{";
-static char *tex_chapter       = "\\chapter{";
+static char *tex_section       = "\\section{x}\n";
+static char *tex_subsection    = "\\subsection{x}\n";
+static char *tex_chapter       = "\\chapter{x}\n";
 
 static char *tex_equation_o    = "\\begin{align}";
 static char *tex_equation_c    = "\\end{align}\n";
