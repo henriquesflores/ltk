@@ -2,6 +2,6 @@
 title: My awesome title
 author: John Doe 
 date: true 
-type: article
+type: note 
 letter: 14
 ---

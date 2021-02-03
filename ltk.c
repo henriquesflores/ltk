@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "ltk.h"
+#include "yml.h"
 #include "tex.h"
 
 void usage();
@@ -11,17 +12,23 @@ static String_View gb = {global_buffer, KILO};
 static
 Yml yml = {
     .date   = false,
-    .letter = 10,
+    .toc    = true,
     .type   = NOTE,
+    .letter = {"10", 2},
     .title  = {NULL, 0},
     .author = {NULL, 0}
 };
 
-int main() {
+int main(size_t argc, char **argv) {
 
     String_View file = readfile("./tests/yml.md");
     yml_parse(&yml, file);
+
+    FILE *fout = fopen("out.tex", "w");
+    tex_init(&yml, fout);
+
     sv_free(file);
+    fclose(fout);
 
 #if 0
 #endif

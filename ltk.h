@@ -41,6 +41,9 @@ void sv_free(String_View str) {
 }
 
 String_View *sv_copy(String_View *dest, String_View *src) {
+    assert(dest);
+    assert(src);
+
     dest->len = src->len;
     memcpy((char *)dest->str, src->str, src->len);
 
@@ -57,8 +60,7 @@ bool sv_eq(String_View a, String_View b) {
 }
 
 bool sv_isempty(String_View sv) {
-    String_View empty_str = {"", 0};
-    return sv_eq(empty_str, sv);
+    return sv.len == 0 ? true : false;
 }
 
 String_View sv_trim_left(String_View sv) {
@@ -162,6 +164,21 @@ String_View sv_chop_str(String_View *sv, String_View find) {
     sv->len = sv->len - index - find.len;
 
     return result;
+}
+
+String_View *sv_append_in_buffer(String_View *buffer, 
+                                 String_View sv1, 
+                                 String_View sv2) {
+
+    assert(buffer->len >= sv1.len + sv2.len);
+    buffer->len = sv1.len + sv2.len;
+    snprintf( (char *)buffer->str
+            , buffer->len + 1
+            , SVFMT SVFMT
+            , SVARG(sv1), SVARG(sv2)
+            );
+
+    return buffer;
 }
 
 String_View *sv_replace_in_buffer(String_View *buffer,

@@ -1,36 +1,58 @@
-\documentclass[12pt]{article}
-\input{/home/henrique/Dropbox/Henrique/Notes/packages.tex}
+\documentclass[14pt]{article}
 
-\title{This is a good title}
-\author{I'm the author}
-\date{today}
+\usepackage[a4paper, margin=2cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsbsy}
+\usepackage{mathrsfs}
+\usepackage{slashed}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{color}
+\usepackage{cite}
+\usepackage{float}
+
+\numberwithin{equation}{section}
+
+\newtheoremstyle{henrique}        % Name
+  { }                             % Space above
+  {}                              % Space below
+  {\normalfont}                   % Body font
+  {}                              % Indent amount
+  {\bfseries}                     % Theorem head font
+  {.}                             % Punctuation after theorem head
+  { }                             % Space after theorem head, ' ', or \newline
+  {}                              % Theorem head spec (can be left empty, meaning `normal')
+\theoremstyle{henrique}
+\newtheorem{teo}{Theorem}[section]
+\newtheorem{defi}{Definition}[section]
+\newtheorem{lema}{Lemma}[section]
+\newtheorem{corol}{Corollary}[section]
+\newtheorem{prop}{Proposition}[section]
+
+
+\hypersetup{colorlinks=false,
+            urlbordercolor  = {1 0 0},
+            linkbordercolor = {0 0 1},
+            citebordercolor = {0 0 1} }
+
+
+\title{My awesome title}
+
+\author{John Doe}
+
+\date{}
 
 \begin{document}
 
 \begin{center}
-\Large{This is a good title}
-\\
-\textbf{I'm the author}
+\Large{\textbf{My awesome title}}
+John Doe
 \end{center}
 
 \tableofcontents
-
-\section{Introduction}
-
-fjwef
-wofjifhwrfwrihwrgpwrh
-wrgwrirjwgpighwpghwg
-wgwrofgjwfjowefpweojfe
-fqjfpefjqepfj
-
-$$ 
-E = mc^{2}
-$$
-
-fejfpewfhpifrhpri
-qfojqpfjepfjef
-qejofpqjfpqefjq
-fqepfjqpfjqpfjq
-pqfjqpofjqepfojeq
-
-#
