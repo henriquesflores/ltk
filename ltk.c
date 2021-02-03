@@ -10,8 +10,11 @@
 void usage();
 
 static char global_buffer[BUFFERMAX] = {0};
+static char holder_buffer[BUFFERMAX] = {0};
+static String_View   hb = {holder_buffer, BUFFERMAX};
 static String_View   gb = {global_buffer, BUFFERMAX};
 static String_View *pgb = &gb;
+static String_View *phb = &hb;
 
 static
 Yml yml = {
@@ -25,31 +28,41 @@ Yml yml = {
 
 static
 Cmd cmd = {
-    .md = (String_View) {NULL, 0},
-    .tex_open = (String_View) {NULL, 0},
+    .md_open   = (String_View) {NULL, 0},
+    .md_close  = (String_View) {NULL, 0},
+    .tex_open  = (String_View) {NULL, 0},
     .tex_close = (String_View) {NULL, 0},
 };
 
+FILE *open_tex(String_View md_filename) {
+        String_View file_name = sv_chop_str(&md_filename, sv(".md")); 
+        sv_append_in_buffer(pgb, file_name, sv(".tex"));
+        FILE *out = fopen(gb.str, "w");
+        return out;
+}
+
 int main(size_t argc, char **argv) {
+
 
     if (argc == 2) {
         String_View md_file = sv(argv[1]);
-        String_View file_name = sv_chop_str(&md_file, sv(".md")); 
-    
-        char tex_file_name[KILO];
-        String_View tex_file = {tex_file_name, KILO};
-        sv_append_in_buffer(&tex_file, file_name, sv(".tex"));
-        FILE *out = fopen(tex_file.str, "w");
-        fprintf(out, "Opa Davai\n");
+
+        String_View file = readfile(md_file);
+        FILE *out = open_tex(md_file);
+
+        yml_parse(&yml, &file);
+        tex_init(&yml, out);
+        
+        String_View md = sv_trim_left(file);
+        tex_parse(pgb, phb, &cmd, md);
+        fprintf(out, SVFMT, SVARG(gb));
+//        tex_end(out);
+        
         fclose(out);
     }
 
     
 #if 0
-    char holder_buffer[BUFFERMAX] = {0};
-    String_View   hb = {holder_buffer, BUFFERMAX};
-    String_View *phb = &hb;
-
     String_View file = readfile("../tests/bold_it.md");
 
     parse_in_buffer(pgb, file, cmd_bf(&cmd));

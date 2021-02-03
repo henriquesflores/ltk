@@ -95,18 +95,18 @@ Yml *yml_author(Yml *y, String_View file) {
     return y;
 }
 
-String_View yml_extract(String_View file) { 
-    sv_chop_str(&file, sv("---"));
-    sv_getline(&file);
-    String_View yml_environ = sv_chop_str(&file, sv("---"));
+String_View yml_extract(String_View *file) { 
+    sv_chop_str(file, sv("---"));
+    sv_getline(file);
+    String_View yml_environ = sv_chop_str(file, sv("---"));
     
-    if (sv_eq(yml_environ, file)) 
+    if (sv_eq(yml_environ, *file)) 
         return (String_View) {NULL, 0};
     else
         return yml_environ;
 }
 
-Yml *yml_parse(Yml *y, String_View file) {
+Yml *yml_parse(Yml *y, String_View *file) {
     String_View yml_env = yml_extract(file);
     
     if (sv_isempty(yml_env))

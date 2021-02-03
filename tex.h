@@ -5,7 +5,8 @@
 #include "yml.h"
 
 typedef struct Cmd {
-    String_View md;
+    String_View md_open;
+    String_View md_close;
     String_View tex_open;
     String_View tex_close;
 } Cmd;
@@ -48,7 +49,8 @@ static char *md_item;
 static char *md_equation;
 
 Cmd *cmd_section(Cmd *cmd) {
-    cmd->md = sv(md_section);
+    cmd->md_open   = sv(md_section);
+    cmd->md_close  = sv("\n");
     cmd->tex_open  = sv(tex_section);
     cmd->tex_close = sv(tex_close_env); 
 
@@ -56,7 +58,8 @@ Cmd *cmd_section(Cmd *cmd) {
 }
 
 Cmd *cmd_subsection(Cmd *cmd) {
-    cmd->md = sv(md_subsection);
+    cmd->md_open   = sv(md_subsection);
+    cmd->md_close  = sv("\n");
     cmd->tex_open  = sv(tex_subsection);
     cmd->tex_close = sv(tex_close_env); 
 
@@ -64,31 +67,35 @@ Cmd *cmd_subsection(Cmd *cmd) {
 }
 
 Cmd *cmd_bf(Cmd *cmd) {
-    cmd->md = sv(md_bf);
-    cmd->tex_open = sv(tex_bf);
+    cmd->md_open   = sv(md_bf);
+    cmd->md_close  = sv(md_bf);
+    cmd->tex_open  = sv(tex_bf);
     cmd->tex_close = sv(tex_close_env);
 
     return cmd;
 }
 
 Cmd *cmd_it(Cmd *cmd) {
-    cmd->md = sv(md_it);
-    cmd->tex_open = sv(tex_it);
+    cmd->md_open   = sv(md_it);
+    cmd->md_close  = sv(md_it);
+    cmd->tex_open  = sv(tex_it);
     cmd->tex_close = sv(tex_close_env);
 
     return cmd;
 }
 
 Cmd *cmd_un(Cmd *cmd) {
-    cmd->md = sv(md_un);
-    cmd->tex_open = sv(tex_un);
+    cmd->md_open   = sv(md_un);
+    cmd->md_close  = sv(md_un);
+    cmd->tex_open  = sv(tex_un);
     cmd->tex_close = sv(tex_close_env);
 
     return cmd;
 }
 
 Cmd *cmd_itemize(Cmd *cmd) {
-    cmd->md = (String_View) {NULL, 0};
+    cmd->md_open   = (String_View) {NULL, 0};
+    cmd->md_close  = (String_View) {NULL, 0};
     cmd->tex_open  = sv(tex_itemize_o);
     cmd->tex_close = sv(tex_itemize_c);
 
@@ -96,7 +103,8 @@ Cmd *cmd_itemize(Cmd *cmd) {
 }
 
 Cmd *cmd_item(Cmd *cmd) {
-    cmd->md = sv(md_item);
+    cmd->md_open   = sv(md_item);
+    cmd->md_close  = sv("\n");
     cmd->tex_open  = sv(tex_item);
     cmd->tex_close = (String_View) {NULL, 0};
 
@@ -104,7 +112,8 @@ Cmd *cmd_item(Cmd *cmd) {
 }
 
 Cmd *cmd_equation(Cmd *cmd) {
-    cmd->md = sv(md_equation);
+    cmd->md_open   = sv(md_equation);
+    cmd->md_close  = sv(md_equation);
     cmd->tex_open  = sv(tex_equation_o);
     cmd->tex_close = sv(tex_equation_c);
 
@@ -178,8 +187,10 @@ void tex_init(Yml *y, FILE *tex_file) {
 
     }
    
-    if (y->toc) 
+    if (y->toc) {
         fputs(tex_toc, tex_file);
+        fputs("\n", tex_file);
+    }
 }
 
 void tex_end(FILE *tex_file) {
@@ -191,10 +202,10 @@ String_View *parse_in_buffer(String_View *buffer,
                              String_View str,
                              Cmd *cmd) {
     size_t nm = 0;
-    if (cmd->md.len == 1) 
-        nm = sv_count_char(str, *cmd->md.str); 
+    if (cmd->md_open.len == 1) 
+        nm = sv_count_char(str, *cmd->md_open.str); 
     else 
-        nm = sv_count_str(str, cmd->md);
+        nm = sv_count_str(str, cmd->md_open);
 
     if (!nm) {
         sv_copy(buffer, &str);
@@ -207,9 +218,9 @@ String_View *parse_in_buffer(String_View *buffer,
     sv_copy(&holder, &str);
     while (nm) {
         if (nm-- % 2 == 0) 
-            sv_replace_in_buffer(buffer, holder, cmd->md, cmd->tex_open);
+            sv_replace_in_buffer(buffer, holder, cmd->md_open, cmd->tex_open);
         else 
-            sv_replace_in_buffer(buffer, holder, cmd->md, cmd->tex_close);
+            sv_replace_in_buffer(buffer, holder, cmd->md_close, cmd->tex_close);
     
         sv_copy(&holder, buffer); 
     } 
@@ -217,12 +228,57 @@ String_View *parse_in_buffer(String_View *buffer,
     return buffer;
 }
 
+String_View *parse_environs(String_View *buffer,
+                            String_View str,
+                            Cmd *cmd) {
 
+    size_t count = sv_count_str(str, cmd->md_open);
 
+    if (!count) 
+        return buffer;
 
+    char h[BUFFERMAX] = {0};
+    String_View helper = {h, BUFFERMAX};
 
-static char *md_section    = "##";
-static char *md_subsection = "####";
+    sv_copy(buffer, &str);
+    for (size_t j = 0; j < count; j++) {
+        sv_replace_in_buffer(&helper, *buffer, cmd->md_open, cmd->tex_open);
+        sv_replace_in_buffer( buffer,  helper, cmd->md_close, cmd->tex_close);
+        sv_copy(&helper, buffer);
+    }
+
+    return buffer;
+}
+
+void tex_parse(String_View *gbuffer, 
+               String_View *hbuffer, 
+               Cmd *cmd,
+               String_View file) {
+
+    cmd_section(cmd);
+    parse_environs(hbuffer, file, cmd);
+    sv_copy(gbuffer, hbuffer);
+
+    cmd_subsection(cmd);
+    parse_environs(hbuffer, *gbuffer, cmd);
+    sv_copy(gbuffer, hbuffer);
+    
+    cmd_equation(cmd);
+    parse_in_buffer(hbuffer, *gbuffer, cmd);
+    sv_copy(gbuffer, hbuffer);
+
+    cmd_bf(cmd);
+    parse_in_buffer(hbuffer, *gbuffer, cmd);
+    sv_copy(gbuffer, hbuffer);
+
+    cmd_un(cmd);
+    parse_in_buffer(hbuffer, *gbuffer, cmd);
+    sv_copy(gbuffer, hbuffer);
+
+} 
+
+static char *md_section    = "## ";
+static char *md_subsection = "### ";
 static char *md_bf         = "**";
 static char *md_it         = "*";
 static char *md_un         = "@";
@@ -238,11 +294,11 @@ static char *tex_maketitle     = "\\maketitle\n";
 static char *tex_toc           = "\\tableofcontents\n";
 static char *tex_author        = "\\author{x}\n";
 static char *tex_date          = "\\date{}\n";
-static char *tex_section       = "\\section{x}\n";
-static char *tex_subsection    = "\\subsection{x}\n";
-static char *tex_chapter       = "\\chapter{x}\n";
+static char *tex_section       = "\\section{";
+static char *tex_subsection    = "\\subsection{";
+static char *tex_chapter       = "\\chapter{";
 
-static char *tex_equation_o    = "\\begin{align}\n";
+static char *tex_equation_o    = "\\begin{align}";
 static char *tex_equation_c    = "\\end{align}\n";
 static char *tex_itemize_o     = "\\begin{itemize}\n";
 static char *tex_itemize_c     = "\\end{itemize}\n";

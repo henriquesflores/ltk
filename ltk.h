@@ -85,10 +85,10 @@ String_View sv_trim(String_View sv) {
     return sv_trim_left(sv_trim_right(sv));
 }
 
-String_View readfile(const char *filepath) {
-    FILE *f = fopen(filepath, "r");
+String_View readfile(String_View filepath) {
+    FILE *f = fopen(filepath.str, "r");
     if (!f) {
-        fprintf(stderr, "Cannot find file: %s\n", filepath);
+        fprintf(stderr, "Cannot find file:" SVFMT "\n", SVARG(filepath));
         exit(1);
     }
 
