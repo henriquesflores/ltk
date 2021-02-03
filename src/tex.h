@@ -5,11 +5,18 @@
 #include "ltk.h"
 #include "yml.h"
 
+typedef struct Cmd {
+    String_View md;
+    String_View tex_open;
+    String_View tex_close;
+} Cmd;
+
 // TEX main commands declarations.
 // Definitions at the end of file.
 static char *tex_documentclass;
 static char *tex_begindoc; 
 static char *tex_enddoc; 
+static char *tex_packages;
 
 static char *tex_title; 
 static char *tex_maketitle; 
@@ -31,9 +38,83 @@ static char *tex_it;
 static char *tex_un;
 static char *tex_close_env;
 
-static char *tex_packages;
+// MD declarations.
+static char *md_section;
+static char *md_subsection;
+static char *md_chapter;
+static char *md_bf;
+static char *md_it;
+static char *md_un;
+static char *md_item;
+static char *md_equation;
+
+Cmd *cmd_section(Cmd *cmd) {
+    cmd->md = sv(md_section);
+    cmd->tex_open  = sv(tex_section);
+    cmd->tex_close = sv(tex_close_env); 
+
+    return cmd;
+}
+
+Cmd *cmd_subsection(Cmd *cmd) {
+    cmd->md = sv(md_subsection);
+    cmd->tex_open  = sv(tex_subsection);
+    cmd->tex_close = sv(tex_close_env); 
+
+    return cmd;
+}
+
+Cmd *cmd_bf(Cmd *cmd) {
+    cmd->md = sv(md_bf);
+    cmd->tex_open = sv(tex_bf);
+    cmd->tex_close = sv(tex_close_env);
+
+    return cmd;
+}
+
+Cmd *cmd_it(Cmd *cmd) {
+    cmd->md = sv(md_it);
+    cmd->tex_open = sv(tex_it);
+    cmd->tex_close = sv(tex_close_env);
+
+    return cmd;
+}
+
+Cmd *cmd_un(Cmd *cmd) {
+    cmd->md = sv(md_un);
+    cmd->tex_open = sv(tex_un);
+    cmd->tex_close = sv(tex_close_env);
+
+    return cmd;
+}
+
+Cmd *cmd_itemize(Cmd *cmd) {
+    cmd->md = (String_View) {NULL, 0};
+    cmd->tex_open  = sv(tex_itemize_o);
+    cmd->tex_close = sv(tex_itemize_c);
+
+    return cmd;
+}
+
+Cmd *cmd_item(Cmd *cmd) {
+    cmd->md = sv(md_item);
+    cmd->tex_open  = sv(tex_item);
+    cmd->tex_close = (String_View) {NULL, 0};
+
+    return cmd;
+}
+
+Cmd *cmd_equation(Cmd *cmd) {
+    cmd->md = sv(md_equation);
+    cmd->tex_open  = sv(tex_equation_o);
+    cmd->tex_close = sv(tex_equation_c);
+
+    return cmd;
+}
 
 void tex_init(Yml *y, FILE *tex_file) {
+    assert(tex_file);
+
     char b1[KILO];
     String_View buffer1 = {b1, KILO};
 
@@ -100,9 +181,51 @@ void tex_init(Yml *y, FILE *tex_file) {
    
     if (y->toc) 
         fputs(tex_toc, tex_file);
-
-
 }
+
+void tex_end(FILE *tex_file) {
+    assert(tex_file);
+    fputs(tex_enddoc, tex_file);
+}
+
+String_View *parse_in_buffer(String_View *buffer,
+                             String_View str,
+                             Cmd *cmd) {
+    size_t nm = 0;
+    if (cmd->md.len == 1) 
+        nm = sv_count_char(str, *cmd->md.str); 
+    else 
+        nm = sv_count_str(str, cmd->md);
+
+    if (!nm) {
+        sv_copy(buffer, &str);
+        return buffer;
+    }
+
+    char temp[KILO];
+    String_View holder = {temp, KILO};
+    
+    sv_copy(&holder, &str);
+    while (nm) {
+        if (nm-- % 2 == 0) 
+            sv_replace_in_buffer(buffer, holder, cmd->md, cmd->tex_open);
+        else 
+            sv_replace_in_buffer(buffer, holder, cmd->md, cmd->tex_close);
+    
+        sv_copy(&holder, buffer); 
+    } 
+    
+    return buffer;
+}
+
+
+static char *md_section    = "##";
+static char *md_subsection = "####";
+static char *md_bf         = "**";
+static char *md_it         = "*";
+static char *md_un         = "@";
+static char *md_item       = " -";
+static char *md_equation   = "$$";
 
 static char *tex_documentclass = "\\documentclass[x]{y}\n";
 static char *tex_begindoc      = "\\begin{document}\n";

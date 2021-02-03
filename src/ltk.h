@@ -139,12 +139,26 @@ String_View sv_getline(String_View *sv) {
     return sv_chop_char(sv, '\n');
 }
 
+size_t sv_count_str(String_View src, String_View find) {
+    size_t i = 0;
+    
+    int N = src.len - find.len + 1;
+    if (N < 0) return i;
+
+    for (int j = 0; j < N; j++) {
+        int needle = memcmp(find.str, src.str + j, find.len);
+        i += (needle == 0) ? 1 : 0;
+    }
+
+    return i;
+}
+
 int sv_find_str(String_View sv, String_View find) {
     int N = sv.len - find.len + 1;
     if (N < 0)
         return -1;
 
-    for (size_t j = 0; j < N; j++) {
+    for (int j = 0; j < N; j++) {
         int needle = memcmp(find.str, sv.str + j, find.len);
 
         if (!needle) 
@@ -199,33 +213,6 @@ String_View *sv_replace_in_buffer(String_View *buffer,
             , SVARG(string)
             ); 
 
-    return buffer;
-}
-
-String_View *parse_in_buffer(String_View *buffer,
-                             String_View str,
-                             String_View marker) {
-    
-    size_t nm = sv_count_char(str, *marker.str); 
-
-    if (!nm) {
-        sv_copy(buffer, &str);
-        return buffer;
-    }
-
-    char temp[KILO];
-    String_View holder = {temp, KILO};
-    
-    sv_copy(&holder, &str);
-    while (nm) {
-        if (nm-- % 2 == 0) 
-            sv_replace_in_buffer(buffer, holder, marker, sv("\\textbf{"));
-        else 
-            sv_replace_in_buffer(buffer, holder, marker, sv("}"));
-    
-        sv_copy(&holder, buffer); 
-    } 
-    
     return buffer;
 }
 

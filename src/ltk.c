@@ -6,8 +6,15 @@
 
 void usage();
 
-static char global_buffer[KILO] = {0};
-static String_View gb = {global_buffer, KILO};
+static char global_buffer[MEGA] = {0};
+static String_View   gb = {global_buffer, MEGA};
+static String_View *pgb = &gb;
+
+Cmd cmd = {
+    .md = (String_View) {NULL, 0},
+    .tex_open = (String_View) {NULL, 0},
+    .tex_close = (String_View) {NULL, 0},
+};
 
 static
 Yml yml = {
@@ -20,17 +27,25 @@ Yml yml = {
 };
 
 int main(size_t argc, char **argv) {
+    
+    char holder_buffer[MEGA] = {0};
+    String_View   hb = {holder_buffer, MEGA};
+    String_View *phb = &hb;
 
-    String_View file = readfile("./tests/yml.md");
-    yml_parse(&yml, file);
+    String_View file = readfile("./tests/bold.md");
 
-    FILE *fout = fopen("out.tex", "w");
-    tex_init(&yml, fout);
+    parse_in_buffer(pgb, file, cmd_bf(&cmd));
+    sv_copy(phb, pgb);
+    parse_in_buffer(pgb, hb, cmd_it(&cmd));
+    sv_print(gb);
 
     sv_free(file);
-    fclose(fout);
 
 #if 0
+    yml_parse(&yml, file);
+    FILE *fout = fopen("out.tex", "w");
+    tex_init(&yml, fout);
+    fclose(fout);
 #endif
     
     return 0;
