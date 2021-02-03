@@ -193,12 +193,16 @@ String_View sv_take_between(String_View *sv,
     String_View init = *sv;
 
     String_View prev  = sv_chop_str(sv, begin);
-    if (sv_eq(prev, *sv))
+    if (sv_eq(prev, *sv)) {
+        sv = &init;
         return init;
+    }
 
     String_View field = sv_chop_str(sv, end);
-    if (sv_eq(field, *sv))
+    if (sv_eq(field, *sv)) {
+        sv = &init;
         return init;
+    }
 
     return sv_trim(field);
 }

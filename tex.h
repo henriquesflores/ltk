@@ -248,8 +248,8 @@ String_View *parse_headers(String_View *buffer1,
     size_t count = sv_count_str(str, cmd->md_open);
     while (count--) {
         String_View field = sv_take_between(&str, cmd->md_open, cmd->md_close);
-        sv_replace_in_buffer(&h, sv(tex_section), sv("x"), field);
-        sv_replace_between_in_buffer(buffer2, *buffer1, sv("##"), sv("\n"), h);
+        sv_replace_in_buffer(&h, cmd->tex_open, sv("x"), field);
+        sv_replace_between_in_buffer(buffer2, *buffer1, cmd->md_open, cmd->md_close, h);
         sv_copy(buffer1, buffer2);
     }
 
@@ -261,14 +261,14 @@ void tex_parse(String_View *gbuffer,
                Cmd *cmd,
                String_View file) {
 
-    cmd_section(cmd);
+    cmd_subsection(cmd);
     parse_headers(hbuffer, gbuffer, file, cmd);
     sv_copy(gbuffer, hbuffer);
-
-    cmd_subsection(cmd);
+ 
+    cmd_section(cmd);
     parse_headers(hbuffer, gbuffer, *gbuffer, cmd);
     sv_copy(gbuffer, hbuffer);
-    
+   
     cmd_equation(cmd);
     parse_in_buffer(hbuffer, *gbuffer, cmd);
     sv_copy(gbuffer, hbuffer);

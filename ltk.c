@@ -20,7 +20,7 @@ static String_View *phb = &hb;
 static
 Yml yml = {
     .date   = false,
-    .toc    = true,
+    .toc    = false,
     .type   = NOTE,
     .letter = {"10", 2},
     .title  = {NULL, 0},
@@ -54,9 +54,6 @@ int main(size_t argc, char **argv) {
         sv_append_in_buffer(pgb, hb, texfile);
         execl("/usr/bin/pdflatex", "/usr/bin/pdflatex", gb.str, (char *) NULL);
     }
-
-    printf(SVFMT, SVARG(hb));
-
 
     return 0;
 }

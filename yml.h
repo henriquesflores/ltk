@@ -91,11 +91,15 @@ Yml *yml_author(Yml *y, String_View file) {
 }
 
 String_View yml_extract(String_View *file) { 
-    String_View yml_environ = sv_take_between(file, sv("---"), sv("---"));
-    if (sv_eq(yml_environ, *file)) 
+    String_View prev = sv_chop_str(file, sv("---"));
+    if (sv_eq(prev, *file)) 
+        return (String_View) {NULL, 0};
+
+    String_View yml_env = sv_chop_str(file, sv("---"));
+    if (sv_eq(yml_env, *file)) 
         return (String_View) {NULL, 0};
     else
-        return yml_environ;
+        return yml_env;
 }
 
 Yml *yml_parse(Yml *y, String_View *file) {
