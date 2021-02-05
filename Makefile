@@ -11,7 +11,6 @@ debug: basic
 
 ltk: src/ltk.c
 	$(CC) $(COMMONFLAGS) -o src/ltk src/ltk.c
-	./src/ltk
 
 clean:
 	rm src/ltk

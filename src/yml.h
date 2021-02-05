@@ -114,6 +114,8 @@ Yml *yml_parse(Yml *y, String_View *file) {
     yml_type(y, yml_env);
     yml_title(y, yml_env);
     yml_author(y, yml_env);
+
+    return y;
 }
 
 #endif // YML_H_

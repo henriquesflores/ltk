@@ -2,6 +2,7 @@
 title: This is a good title
 author: I'm the author
 date: true 
+toc: true
 ---
 
 ## Introduction
@@ -46,4 +47,3 @@ wefhweiofewhfoeiwhfweoifhajsdjd
 adpaosidpasfupihvlhbnwvpcecec
 cwjehofhweovovnovbobhohegegh
 weifjoewhfweofiheofh
-

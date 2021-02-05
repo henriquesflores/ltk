@@ -124,7 +124,7 @@ String_View readfile(String_View filepath) {
 
     char *contents = malloc(file_size + 1);
 
-    size_t bytes_read =
+    long bytes_read =
         fread(contents, 1, file_size, f); 
 
     assert(bytes_read == file_size);
@@ -145,11 +145,12 @@ size_t sv_count_char(String_View sv, char c) {
 
 int sv_find_char(String_View sv, char c) {
     int i = 0;
-    while (i < sv.len && sv.str[i] != c) {
+    int len = (int) sv.len;
+    while (i < len && sv.str[i] != c) {
         i += 1;
     }
 
-    return (i >= sv.len) ? -1 : i;
+    return (i >= len) ? -1 : i;
 }
 
 String_View sv_chop_char(String_View *sv, char c) {
@@ -163,6 +164,22 @@ String_View sv_chop_char(String_View *sv, char c) {
     sv->len = sv->len - i - 1;
 
     return choped;
+}
+
+String_View sv_chop_char_from_right(String_View *sv, char c) {
+    int i = sv->len - 1;
+    while (i >= 0 && sv->str[i] != c) {
+        i--;
+    }
+    
+    if (i < 0) return *sv;
+
+    size_t delta = sv->len - i;
+    String_View result = {sv->str, sv->len - delta};
+    sv->str = sv->str + delta;
+    sv->len = delta;
+
+    return result;
 }
 
 String_View sv_getline(String_View *sv) {
@@ -306,11 +323,22 @@ String *str_replace_between(
 
     return buffer;
 }
-                                           
-String_View *exepath(String_View *path) {
-    int bytes = readlink("/proc/self/exe", (char *)path->str, path->len);
+
+#if 0
+String *exepath(String *path) {
+    int bytes = readlink("/proc/self/exe", path->str, BUFFERMAX);
     assert(bytes != -1);
+    path->len = strlen(path->str);
     return path;
+}
+#endif
+
+String *str_remove_from_right(String *s, int remove) {
+    assert(remove > 0);
+    s->str[s->len - remove] = 0;
+    s->len = strlen(s->str);
+
+    return s;
 }
 
 #endif // LTK_H_

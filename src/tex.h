@@ -24,7 +24,7 @@ static char *tex_author;
 static char *tex_date; 
 static char *tex_section;
 static char *tex_subsection;
-static char *tex_chapter; 
+// static char *tex_chapter; 
 
 static char *tex_equation_o;
 static char *tex_equation_c;
@@ -40,7 +40,6 @@ static char *tex_close_env;
 // MD declarations.
 static char *md_section;
 static char *md_subsection;
-static char *md_chapter;
 static char *md_bf;
 static char *md_it;
 static char *md_un;
@@ -179,7 +178,7 @@ FILE *tex_init(
     fprintf(tex_file, SVFMT"\n", SVARG(helper_buffer));
 
     if (y->date) {
-        fprintf(tex_file, "\\date{\\today}\n\n");
+        fprintf(tex_file, "%s\n\n", tex_date);
     }
     
     fprintf(tex_file, "%s\n", tex_begindoc);
@@ -321,10 +320,10 @@ static char *tex_title         = "\\title{x}\n";
 static char *tex_maketitle     = "\\maketitle\n";
 static char *tex_toc           = "\\tableofcontents\n";
 static char *tex_author        = "\\author{x}\n";
-static char *tex_date          = "\\date{}\n";
+static char *tex_date          = "\\date{\\today}\n";
 static char *tex_section       = "\\section{x}\n";
 static char *tex_subsection    = "\\subsection{x}\n";
-static char *tex_chapter       = "\\chapter{x}\n";
+//static char *tex_chapter       = "\\chapter{x}\n";
 
 static char *tex_equation_o    = "\\begin{align}";
 static char *tex_equation_c    = "\\end{align}\n";
