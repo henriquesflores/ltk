@@ -21,9 +21,9 @@ Yml yml = {
     .author = {NULL, 0}
 };
 
-const char *next(size_t *argc, char ***args) {
+char *next(size_t *argc, char ***args) {
     if (*argc > 0) {
-        const char *instruction = *args[0];
+        char *instruction = *args[0];
         *args = *args + 1;
         *argc = *argc - 1;
         return instruction; 
@@ -33,32 +33,39 @@ const char *next(size_t *argc, char ***args) {
 }
 
 int main(size_t argc, char **argv) {
+        
+        bool set_pdf = false;
+        char *inputfile;
 
-        String_View input = sv(argv[1]);
-        mount_tex_file(input);
-       
-#if 0 
-        getcwd((char *)hb.str, KILO);
-        hb.len = strlen(hb.str);
+        if (argc == 1)
+            usage(stderr);
 
-        String_View filename = sv_chop_str(&input, sv(".md"));
-        char tt[KILO];
-        String_View texfile = {tt, KILO};
-        sv_append_in_buffer(&texfile, filename, sv(".tex"));
-        sv_append_in_buffer(pgb, hb, sv("/"));
-        sv_copy(phb, pgb);
-        sv_append_in_buffer(pgb, hb, texfile);
-        execl("/usr/bin/pdflatex", "/usr/bin/pdflatex", gb.str, (char *) NULL);
-    }
-
-    next(&argc, &argv); 
-    while (argc) {
-        const char *inst = next(&argc, &argv);
-        if (strcmp(inst, "--pdf") == 0) {
-            printf("This is inst: %s\n", inst);
+        next(&argc, &argv); 
+        while (argc) {
+            char *inst = next(&argc, &argv);
+            if (argc == 0) {
+                inputfile = inst;
+                mount_tex_file(sv(inputfile));
+            } else if (strcmp(inst, "--pdf") == 0) {
+                set_pdf = true;
+            }
         }
-    }
-#endif
+
+        
+        if (set_pdf) {
+            String wd;
+            getcwd(wd.str, BUFFERMAX);
+            wd.len = strlen(wd.str);
+
+            String tf;
+            str_replace(&tf, sv(inputfile), sv(".md"), sv(".tex"));
+
+            String final;
+            str_append(&final, sv_from_string(&wd), sv("/"));
+            str_copy(&wd, &final);
+            str_append(&final, sv_from_string(&wd), sv_from_string(&tf));
+            execl("/usr/bin/pdflatex", "/usr/bin/pdflatex", str_cstr(&final), (char *) NULL);
+       }
 
     return 0;
 }

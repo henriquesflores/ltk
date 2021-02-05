@@ -11,8 +11,7 @@ typedef struct Cmd {
     String_View tex_close;
 } Cmd;
 
-// TEX main commands declarations.
-// Definitions at the end of file.
+// TEX definitions. 
 static char *tex_documentclass;
 static char *tex_begindoc; 
 static char *tex_enddoc; 
@@ -131,7 +130,7 @@ FILE *tex_openfile(String_View md_file) {
         
         String tex_file;
         str_append(&tex_file, filename, sv(".tex"));
-        printf("Generating file:" SVFMT "\n", SVARG(tex_file));
+        printf("Generating file:\n\t"SVFMT"\n", SVARG(tex_file));
         
         FILE *stream = str_fileopen(&tex_file, "w"); 
         return stream;
