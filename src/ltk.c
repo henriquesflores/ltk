@@ -7,16 +7,10 @@
 #include "yml.h"
 #include "tex.h"
 
-void usage();
+void usage(FILE *stream);
 void mount_tex_file();
 
-static char global_buffer[BUFFERMAX] = {0};
-static char holder_buffer[BUFFERMAX] = {0};
-static String_View   hb = {holder_buffer, BUFFERMAX};
-static String_View   gb = {global_buffer, BUFFERMAX};
-static String_View *pgb = &gb;
-static String_View *phb = &hb;
-
+// Default parsing config
 static
 Yml yml = {
     .date   = false,
@@ -27,21 +21,23 @@ Yml yml = {
     .author = {NULL, 0}
 };
 
-static
-Cmd cmd = {
-    .md_open   = (String_View) {NULL, 0},
-    .md_close  = (String_View) {NULL, 0},
-    .tex_open  = (String_View) {NULL, 0},
-    .tex_close = (String_View) {NULL, 0},
-};
-
+const char *next(size_t *argc, char ***args) {
+    if (*argc > 0) {
+        const char *instruction = *args[0];
+        *args = *args + 1;
+        *argc = *argc - 1;
+        return instruction; 
+    } else {
+        return NULL;
+    }
+}
 
 int main(size_t argc, char **argv) {
 
-    if (argc == 2) {
         String_View input = sv(argv[1]);
         mount_tex_file(input);
-
+       
+#if 0 
         getcwd((char *)hb.str, KILO);
         hb.len = strlen(hb.str);
 
@@ -55,28 +51,33 @@ int main(size_t argc, char **argv) {
         execl("/usr/bin/pdflatex", "/usr/bin/pdflatex", gb.str, (char *) NULL);
     }
 
+    next(&argc, &argv); 
+    while (argc) {
+        const char *inst = next(&argc, &argv);
+        if (strcmp(inst, "--pdf") == 0) {
+            printf("This is inst: %s\n", inst);
+        }
+    }
+#endif
+
     return 0;
 }
+ 
 
 void mount_tex_file(String_View md_file) {
-    String_View file = readfile(md_file);
-    char *ptr_tofree = (char *)file.str;
+
+    String_View md_contents = readfile(md_file);
+    yml_parse(&yml, &md_contents);
     
-    FILE *out = tex_openfile(md_file);
-    yml_parse(&yml, &file);
-    tex_init(&yml, out, pgb, phb);
-    
-    String_View md = sv_trim_left(file);
-    tex_parse(pgb, phb, &cmd, md);
-    fprintf(out, SVFMT, SVARG(gb));
-    tex_end(out);
+    FILE *out  = tex_openfile(md_file);
+    tex_init(&yml, out);
+    tex_parse(sv_trim_left(md_contents), out);
     
     fclose(out);
-    free(ptr_tofree);
 }
 
 
-void usage() {
+void usage(FILE *stream) {
     // TODO: Write complete documentation. 
         const char *u = 
     "ltk - Markdown LaTeX converter:\n"
@@ -105,7 +106,7 @@ void usage() {
     "\t\\usepackage{cite}\n"
     "\t\\usepackage{float}\n";
 
-    puts(u);
+    fprintf(stream, "%s\n", u);
 }
 
 

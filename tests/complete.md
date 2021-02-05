@@ -6,7 +6,7 @@ date: true
 
 ## Introduction
 
-fjwef
+*fjwef*
 wofjifhwrfwrihwrgpwrh
 wrgwrirjwgpighwpghwg
 wgwrofgjwfjowefpweojfe
@@ -17,8 +17,8 @@ E = mc^{2}
 $$
 
 fejfpewfhpifrhpri
-qfojqpfjepfjef
-qejofpqjfpqefjq
+**qfojqpfjepfjef
+qejofpqjfpqefjq**
 fqepfjqpfjqpfjq
 pqfjqpofjqepfojeq
 
@@ -39,7 +39,9 @@ $$
 iedewoifhewofihwefiwfh
 fiehwfoihwefoiwehfewifhw
 fhw
-eifwefhweiofhweofiewhf
+
+### An awesome subsection
+@eifwefhweiofhweofiewhf@
 wefhweiofewhfoeiwhfweoifhajsdjd
 adpaosidpasfupihvlhbnwvpcecec
 cwjehofhweovovnovbobhohegegh

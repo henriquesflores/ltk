@@ -1,5 +1,5 @@
-#ifndef TEX_H
-#define TEX_H
+#ifndef TEX_H_
+#define TEX_H_
 
 #include "ltk.h"
 #include "yml.h"
@@ -120,35 +120,53 @@ Cmd *cmd_equation(Cmd *cmd) {
     return cmd;
 }
 
-FILE *tex_openfile(String_View md_filename) {
-        char bf[KILO];
-        String_View b = {bf, KILO};
-        
-        String_View file_name = sv_chop_str(&md_filename, sv(".md")); 
-        sv_append_in_buffer(&b, file_name, sv(".tex"));
-        FILE *out = fopen(b.str, "w");
-        return out;
+FILE *str_fileopen(String *file, const char *mode) {
+    const char *outfile = str_cstr(file);
+    FILE *f = fopen(outfile, mode);
+    return f;
 }
 
-FILE *tex_init(Yml *y, 
-               FILE *tex_file,
-               String_View *buffer1, 
-               String_View *buffer2) {
+FILE *tex_openfile(String_View md_file) {
+        String_View filename = sv_chop_str(&md_file, sv(".md")); 
+        
+        String tex_file;
+        str_append(&tex_file, filename, sv(".tex"));
+        printf("Generating file:" SVFMT "\n", SVARG(tex_file));
+        
+        FILE *stream = str_fileopen(&tex_file, "w"); 
+        return stream;
+}
+
+FILE *tex_init(
+        Yml *y, 
+        FILE *tex_file
+) {
 
     assert(tex_file);
-    sv_append_in_buffer(buffer1, y->letter, sv("pt"));
-    sv_replace_in_buffer(buffer2, sv(tex_documentclass), sv("x"), *buffer1);
+
+    String main_buffer; 
+    String helper_buffer; 
+
+    str_append(&main_buffer, y->letter, sv("pt"));
+    str_replace(&helper_buffer, sv(tex_documentclass), sv("x"), sv_from_string(&main_buffer));
+    str_copy(&main_buffer, &helper_buffer);
    
-    String_View doc_type;
     // TODO: doctype is entangled with document format. 
     // This does not need to be the case.
+    String_View doc_type;
     switch (y->type) {
         case NOTE: {
             doc_type = sv("article");
+            str_replace(&main_buffer, sv_from_string(&helper_buffer), sv("y"), doc_type);
+            fprintf(tex_file, SVFMT"\n", SVARG(main_buffer));
+            fprintf(tex_file, "%s\n\n", tex_packages);
         } break;
 
-        case ARTICLE: {
+        case ARTICLE: { 
             doc_type = sv("article");
+            str_replace(&main_buffer, sv_from_string(&helper_buffer), sv("y"), doc_type);
+            fprintf(tex_file, SVFMT"\n", SVARG(main_buffer));
+            fprintf(tex_file, "%s\n\n", tex_packages);
         } break; 
 
         default: {
@@ -156,23 +174,16 @@ FILE *tex_init(Yml *y,
         } break;
     }
 
-    sv_copy(buffer1, buffer2);
-    sv_replace_in_buffer(buffer2, *buffer1, sv("y"), doc_type);
-    fprintf(tex_file, SVFMT"\n", SV_PTRARG(buffer2));
-    fputs(tex_packages, tex_file);
-    fputs("\n\n", tex_file);
-    sv_replace_in_buffer(buffer1, sv(tex_title),  sv("x"), y->title);
-    sv_replace_in_buffer(buffer2, sv(tex_author), sv("x"), y->author);
-    fprintf(tex_file, SVFMT"\n", SV_PTRARG(buffer1));
-    fprintf(tex_file, SVFMT"\n", SV_PTRARG(buffer2));
+    str_replace(&main_buffer, sv(tex_title),  sv("x"), y->title);
+    str_replace(&helper_buffer, sv(tex_author), sv("x"), y->author);
+    fprintf(tex_file, SVFMT"\n", SVARG(main_buffer));
+    fprintf(tex_file, SVFMT"\n", SVARG(helper_buffer));
 
     if (y->date) {
-        fputs("\\date{}\n", tex_file);
-        fputs("\n", tex_file);
+        fprintf(tex_file, "\\date{\\today}\n\n");
     }
-
-    fputs(tex_begindoc, tex_file);
-    fputs("\n", tex_file);
+    
+    fprintf(tex_file, "%s\n", tex_begindoc);
 
     switch (y->type) {
         case NOTE: {
@@ -184,8 +195,7 @@ FILE *tex_init(Yml *y,
         } break;
 
         case ARTICLE: {
-            fputs(tex_maketitle, tex_file); 
-            fputs("\n", tex_file);
+            fprintf(tex_file, "%s\n\n", tex_maketitle); 
         } break; 
 
         default: {
@@ -195,21 +205,17 @@ FILE *tex_init(Yml *y,
     }
    
     if (y->toc) {
-        fputs(tex_toc, tex_file);
-        fputs("\n", tex_file);
+        fprintf(tex_file, "%s\n", tex_toc);
     }
 
     return tex_file;
 }
 
-void tex_end(FILE *tex_file) {
-    assert(tex_file);
-    fputs(tex_enddoc, tex_file);
-}
-
-String_View *parse_in_buffer(String_View *buffer,
-                             String_View str,
-                             Cmd *cmd) {
+String *parse_markdown(
+        String *buffer,
+        String_View str,
+        Cmd *cmd
+) {
     size_t nm = 0;
     if (cmd->md_open.len == 1) 
         nm = sv_count_char(str, *cmd->md_open.str); 
@@ -217,74 +223,87 @@ String_View *parse_in_buffer(String_View *buffer,
         nm = sv_count_str(str, cmd->md_open);
 
     if (!nm) {
-        sv_copy(buffer, &str);
+        str_copysv(buffer, str);
         return buffer;
     }
-
-    char temp[BUFFERMAX];
-    String_View holder = {temp, BUFFERMAX};
     
-    sv_copy(&holder, &str);
+    String holder;
+    str_copysv(&holder, str);
     while (nm) {
         if (nm-- % 2 == 0) 
-            sv_replace_in_buffer(buffer, holder, cmd->md_open, cmd->tex_open);
+            str_replace(buffer, sv_from_string(&holder), cmd->md_open, cmd->tex_open);
         else 
-            sv_replace_in_buffer(buffer, holder, cmd->md_close, cmd->tex_close);
+            str_replace(buffer, sv_from_string(&holder), cmd->md_close, cmd->tex_close);
     
-        sv_copy(&holder, buffer); 
+        str_copy(&holder, buffer); 
     } 
     
     return buffer;
 }
 
-String_View *parse_headers(String_View *buffer1,
-                           String_View *buffer2,
-                           String_View str,
-                           Cmd *cmd) {
+String *parse_headers(
+        String *buffer1,
+        String *buffer2,
+        String_View str,
+        Cmd *cmd
+) {
 
-    char header[KILO];
-    String_View h = {header, KILO};
-    sv_copy(buffer1, &str);
+    String h;  
+    str_copysv(buffer1, str);
+
     size_t count = sv_count_str(str, cmd->md_open);
     while (count--) {
         String_View field = sv_take_between(&str, cmd->md_open, cmd->md_close);
-        sv_replace_in_buffer(&h, cmd->tex_open, sv("x"), field);
-        sv_replace_between_in_buffer(buffer2, *buffer1, cmd->md_open, cmd->md_close, h);
-        sv_copy(buffer1, buffer2);
+        str_replace(&h, cmd->tex_open, sv("x"), field);
+        str_replace_between(buffer2, sv_from_string(buffer1), cmd->md_open, cmd->md_close, sv_from_string(&h));
+        str_copy(buffer1, buffer2);
     }
 
     return buffer1;
 }
 
-void tex_parse(String_View *gbuffer, 
-               String_View *hbuffer, 
-               Cmd *cmd,
-               String_View file) {
+void tex_parse(String_View file, FILE *stream) {
+
+    Cmd commands = {
+        .md_open   = (String_View) {NULL, 0},
+        .md_close  = (String_View) {NULL, 0},
+        .tex_open  = (String_View) {NULL, 0},
+        .tex_close = (String_View) {NULL, 0},
+    };
+
+    Cmd *cmd = &commands; 
+
+    String global;
+    String helper;
+    str_copysv(&global, file);
+    str_copysv(&helper, file);
 
     cmd_subsection(cmd);
-    parse_headers(hbuffer, gbuffer, file, cmd);
-    sv_copy(gbuffer, hbuffer);
+    parse_headers(&global, &helper, sv_from_string(&helper), cmd);
+    str_copy(&global, &helper);
  
     cmd_section(cmd);
-    parse_headers(hbuffer, gbuffer, *gbuffer, cmd);
-    sv_copy(gbuffer, hbuffer);
+    parse_headers(&global, &helper, sv_from_string(&global), cmd);
+    str_copy(&global, &helper);
    
     cmd_equation(cmd);
-    parse_in_buffer(hbuffer, *gbuffer, cmd);
-    sv_copy(gbuffer, hbuffer);
+    parse_markdown(&helper, sv_from_string(&global), cmd);
+    str_copy(&global, &helper);
 
     cmd_bf(cmd);
-    parse_in_buffer(hbuffer, *gbuffer, cmd);
-    sv_copy(gbuffer, hbuffer);
+    parse_markdown(&helper, sv_from_string(&global), cmd);
+    str_copy(&global, &helper);
 
     cmd_it(cmd);
-    parse_in_buffer(hbuffer, *gbuffer, cmd);
-    sv_copy(gbuffer, hbuffer);
+    parse_markdown(&helper, sv_from_string(&global), cmd);
+    str_copy(&global, &helper);
 
     cmd_un(cmd);
-    parse_in_buffer(hbuffer, *gbuffer, cmd);
-    sv_copy(gbuffer, hbuffer);
-
+    parse_markdown(&helper, sv_from_string(&global), cmd);
+    str_copy(&global, &helper);
+    
+    fprintf(stream, SVFMT, SVARG(global)); 
+    fprintf(stream, "%s", tex_enddoc);
 } 
 
 static char *md_section    = "## ";
@@ -361,4 +380,4 @@ static char *tex_packages      =
 "            linkbordercolor = {0 0 1},\n"
 "            citebordercolor = {0 0 1} }\n";
 
-#endif // TEX_H
+#endif // TEX_H_

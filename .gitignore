@@ -1,4 +1,6 @@
-ltk
+src/ltk
 packages.tex
-out.tex
-complete.*
+tests/complete.tex
+tests/complete.aux
+tests/complete.toc
+tests/complete.log

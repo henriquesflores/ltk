@@ -2,23 +2,18 @@ COMMONFLAGS = -Wall -Werror -Wextra -Wno-unused-function -pedantic -I. -std=c99
 DEBUG = -ggdb
 CC = gcc
 
-run: ltk.c
-	$(CC) -o ltk ltk.c
-	./ltk
+basic: src/ltk.c
+	$(CC) -o src/ltk src/ltk.c
 
-test: run
-	./ltk complete.md
+debug: basic 
+	$(CC) $(DEBUG) -o src/ltk src/ltk.c
+	gdb ./src/ltk
 
-ltk: ltk.c
-	$(CC) $(COMMONFLAGS) -o ltk ltk.c
-	./ltk
-
-debug: run
-	$(CC) $(DEBUG) -o ltk ltk.c
-	gdb ./ltk
+ltk: src/ltk.c
+	$(CC) $(COMMONFLAGS) -o src/ltk src/ltk.c
+	./src/ltk
 
 clean:
-	rm ltk tt
+	rm src/ltk
 
-
-.PHONY: clean, run
+.PHONY: clean, basic

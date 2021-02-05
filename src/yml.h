@@ -1,5 +1,5 @@
-#ifndef YML_H
-#define YML_H
+#ifndef YML_H_
+#define YML_H_
 
 #include "ltk.h"
 
@@ -116,4 +116,4 @@ Yml *yml_parse(Yml *y, String_View *file) {
     yml_author(y, yml_env);
 }
 
-#endif // YML_H
+#endif // YML_H_

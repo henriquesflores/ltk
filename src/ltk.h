@@ -1,5 +1,5 @@
-#ifndef LTK_H
-#define LTK_H
+#ifndef LTK_H_
+#define LTK_H_
 
 #include <assert.h>
 #include <stdio.h>
@@ -19,6 +19,11 @@ typedef struct String_View {
     size_t len;
 } String_View;
 
+typedef struct String {
+    char str[BUFFERMAX];
+    size_t len;
+} String;
+
 #define SVFMT "%.*s"
 #define SVARG(sv) (int) sv.len, sv.str
 #define SV_PTRARG(psv) (int) psv->len, psv->str
@@ -28,17 +33,37 @@ String_View sv(const char *cstr) {
     return (String_View) {cstr, N};
 }
 
-void sv_print(String_View sv) {
-    printf(SVFMT"\n", SVARG(sv));
+const char *sv_cstr(String_View sv) {
+    char *result = malloc(sv.len + 1);
+    memcpy(result, sv.str, sv.len);
+    result[sv.len] = 0;
+
+    return result;
 }
 
-void sv_fprintf(FILE *stream, String_View sv) {
-    assert(stream);
-    fprintf(stream, SVFMT, SVARG(sv));
+const char *str_cstr(String *s) {
+    s->str[s->len] = 0;
+    return (const char *)s->str;
 }
 
-void sv_free(String_View str) {
-    free((char *)str.str);
+String *str_copy(String *dest, String *src) {
+    assert(dest && src);
+    
+    dest->len = src->len;
+    memcpy(dest->str, src->str, src->len);
+
+    return dest;
+}
+
+String *str_copysv(String *s, String_View sv) {
+    assert(BUFFERMAX >= sv.len);
+    s->len = sv.len;
+    memcpy(s->str, sv.str, sv.len);
+    return s;
+}
+
+String_View sv_from_string(String *s) {
+    return (String_View) {(const char *)s->str, s->len};
 }
 
 String_View *sv_copy(String_View *dest, String_View *src) {
@@ -185,7 +210,6 @@ String_View sv_chop_str(String_View *sv, String_View find) {
     return result;
 }
 
-
 String_View sv_take_between(String_View *sv, 
                             String_View begin, 
                             String_View end) {
@@ -207,13 +231,15 @@ String_View sv_take_between(String_View *sv,
     return sv_trim(field);
 }
 
-String_View *sv_append_in_buffer(String_View *buffer, 
-                                 String_View sv1, 
-                                 String_View sv2) {
-
-//    assert(buffer->len >= sv1.len + sv2.len);
+String *str_append(
+        String *buffer, 
+        String_View sv1, 
+        String_View sv2
+) {
+    
+    assert(BUFFERMAX >= sv1.len + sv2.len);
     buffer->len = sv1.len + sv2.len;
-    snprintf( (char *)buffer->str
+    snprintf( buffer->str
             , buffer->len + 1
             , SVFMT SVFMT
             , SVARG(sv1), SVARG(sv2)
@@ -222,17 +248,20 @@ String_View *sv_append_in_buffer(String_View *buffer,
     return buffer;
 }
 
-String_View *sv_replace_in_buffer(String_View *buffer,
-                                  String_View string,
-                                  String_View find,
-                                  String_View replace) {
-    
+String *str_replace(
+        String *buffer,
+        String_View string,
+        String_View find,
+        String_View replace
+) {
+  
+    assert(BUFFERMAX >= string.len - find.len + replace.len); 
     String_View choped = sv_chop_str(&string, find);    
     if (sv_eq(choped, string))
         return buffer;
 
     buffer->len = choped.len + replace.len + string.len;
-    snprintf( (char *)buffer->str
+    snprintf( buffer->str
             , buffer->len + 1
             , SVFMT SVFMT SVFMT
             , SVARG(choped)
@@ -243,30 +272,31 @@ String_View *sv_replace_in_buffer(String_View *buffer,
     return buffer;
 }
 
-String_View *sv_replace_between_in_buffer(
-        String_View *buffer,
+String *str_replace_between(
+        String *buffer,
         String_View string,
         String_View start,
         String_View end,
         String_View replace
 ) {
 
+    assert(BUFFERMAX >= string.len + replace.len - start.len - end.len);
+
     String_View init   = string;
     String_View before = sv_chop_str(&string, start);
     if (sv_eq(before, string)) {
-        sv_copy(buffer, &init);
+        str_copysv(buffer, init);
         return buffer;
     }
     
-
     String_View middle = sv_chop_str(&string, end);
     if (sv_eq(middle, string)) {
-        sv_copy(buffer, &init);
+        str_copysv(buffer, init);
         return buffer;
     }
     
     buffer->len = before.len + string.len + replace.len;
-    snprintf( (char *)buffer->str
+    snprintf( buffer->str
             , buffer->len + 1
             , SVFMT SVFMT SVFMT
             , SVARG(before)
@@ -277,11 +307,10 @@ String_View *sv_replace_between_in_buffer(
     return buffer;
 }
                                            
-
 String_View *exepath(String_View *path) {
     int bytes = readlink("/proc/self/exe", (char *)path->str, path->len);
     assert(bytes != -1);
     return path;
 }
 
-#endif // LTK_H
+#endif // LTK_H_
