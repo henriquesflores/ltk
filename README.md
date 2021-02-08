@@ -3,13 +3,14 @@ Markdown LaTeX converter written in C.
 
 # Usage
 ``` console
-ltk text.md --tex
+ltk text.md 
 Generating text.tex
 ```
 
-or 
+or with option `--pdf`
 
 ``` console
-ltk text.md --pdf
-Generating text.pdf
+ltk --pdf text.md
 ```
+
+to run pdflatex and output *test.pdf*
