@@ -13,6 +13,7 @@
 #define KILO (1024LL)
 #define MEGA (KILO * 1024LL)
 #define GIGA (MEGA * 1024LL)
+#define BUFFERMAX MEGA 
 
 typedef struct String_View {
     const char *str;
@@ -42,6 +43,7 @@ const char *sv_cstr(String_View sv) {
 }
 
 const char *str_cstr(String *s) {
+    assert(s->len + 1 <= BUFFERMAX);
     s->str[s->len] = 0;
     return (const char *)s->str;
 }
@@ -166,7 +168,7 @@ String_View sv_chop_char(String_View *sv, char c) {
     return choped;
 }
 
-String_View sv_chop_char_from_right(String_View *sv, char c) {
+String_View sv_get_char_from_right(String_View *sv, char c) {
     int i = sv->len - 1;
     while (i >= 0 && sv->str[i] != c) {
         i--;
@@ -174,7 +176,7 @@ String_View sv_chop_char_from_right(String_View *sv, char c) {
     
     if (i < 0) return *sv;
 
-    size_t delta = sv->len - i;
+    size_t delta = sv->len - i - 1;
     String_View result = {sv->str, sv->len - delta};
     sv->str = sv->str + delta;
     sv->len = delta;
@@ -322,23 +324,6 @@ String *str_replace_between(
             );
 
     return buffer;
-}
-
-#if 0
-String *exepath(String *path) {
-    int bytes = readlink("/proc/self/exe", path->str, BUFFERMAX);
-    assert(bytes != -1);
-    path->len = strlen(path->str);
-    return path;
-}
-#endif
-
-String *str_remove_from_right(String *s, int remove) {
-    assert(remove > 0);
-    s->str[s->len - remove] = 0;
-    s->len = strlen(s->str);
-
-    return s;
 }
 
 #endif // LTK_H_

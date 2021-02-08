@@ -3,4 +3,6 @@ packages.tex
 tests/complete.tex
 tests/complete.aux
 tests/complete.toc
+tests/complete.out
 tests/complete.log
+tests/complete.pdf

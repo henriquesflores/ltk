@@ -13,6 +13,11 @@ ltk: src/ltk.c
 	$(CC) $(COMMONFLAGS) -o src/ltk src/ltk.c
 
 clean:
-	rm src/ltk
+	rm tests/complete.aux
+	rm tests/complete.log
+	rm tests/complete.tex
+	rm tests/complete.out
+	rm tests/complete.toc
+	rm tests/complete.pdf
 
-.PHONY: clean, basic
+.PHONY: basic, debug, clean

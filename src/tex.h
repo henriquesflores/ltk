@@ -11,7 +11,6 @@ typedef struct Cmd {
     String_View tex_close;
 } Cmd;
 
-// TEX definitions. 
 static char *tex_documentclass;
 static char *tex_begindoc; 
 static char *tex_enddoc; 
@@ -24,7 +23,7 @@ static char *tex_author;
 static char *tex_date; 
 static char *tex_section;
 static char *tex_subsection;
-// static char *tex_chapter; 
+// static char *tex_chapter;  WILL BE IMPLEMENTED
 
 static char *tex_equation_o;
 static char *tex_equation_c;
@@ -37,7 +36,6 @@ static char *tex_it;
 static char *tex_un;
 static char *tex_close_env;
 
-// MD declarations.
 static char *md_section;
 static char *md_subsection;
 static char *md_bf;
@@ -118,20 +116,13 @@ Cmd *cmd_equation(Cmd *cmd) {
     return cmd;
 }
 
-FILE *str_fileopen(String *file, const char *mode) {
-    const char *outfile = str_cstr(file);
-    FILE *f = fopen(outfile, mode);
-    return f;
-}
-
 FILE *tex_openfile(String_View md_file) {
-        String_View filename = sv_chop_str(&md_file, sv(".md")); 
-        
-        String tex_file;
-        str_append(&tex_file, filename, sv(".tex"));
-        printf("Generating file:\n\t"SVFMT"\n", SVARG(tex_file));
-        
-        FILE *stream = str_fileopen(&tex_file, "w"); 
+
+        String texfile;
+        str_replace(&texfile, md_file, sv(".md"), sv(".tex"));
+        printf("Generating file:\n\t"SVFMT"\n", SVARG(texfile));
+       
+        FILE *stream = fopen(str_cstr(&texfile), "w");
         return stream;
 }
 
