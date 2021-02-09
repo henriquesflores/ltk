@@ -104,7 +104,7 @@ void usage(FILE *stream) {
     "Options:\n"
     "\t-g           Generates sample md file\n"
     "\t-a           Appends auxiliary tex file in preamble\n"
-    "\t--pdf        Generates tex and compiles with pdflatex pdf file\n";
+    "\t--pdf        Generates tex and compiles with pdflatex\n";
     fprintf(stream, "%s\n", u);
     exit(0);
 }
