@@ -11,7 +11,7 @@ void mount_pdf(String_View);
 char *next(int *, char ***);
 
 #define PATH_SEP '/'
-#define TEX_COMPILER "usr/bin/pdflatex"
+#define TEX_COMPILER "/usr/bin/pdflatex"
 
 static
 Yml yml = {
@@ -54,17 +54,13 @@ int main(int argc, char **argv) {
         if (set_pdf) 
             mount_pdf(inputfile);
 
-#if 0
-
-#endif
         return 0;
 }
 
 void mount_pdf(String_View input) {
     String texfile;
-    String_View texfile_view = sv_from_string(&texfile);
-    
     str_replace(&texfile, input, sv(".md"), sv(".tex"));
+    String_View texfile_view = sv_from_string(&texfile);
     String_View path = sv_get_char_from_right(&texfile_view, PATH_SEP);
     
     if (sv_eq(path, texfile_view)) {

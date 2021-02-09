@@ -140,8 +140,10 @@ FILE *tex_init(
     str_append(&main_buffer, y->letter, sv("pt"));
     str_replace(&helper_buffer, sv(tex_documentclass), sv("x"), sv_from_string(&main_buffer));
     str_copy(&main_buffer, &helper_buffer);
-
-    String_View auxcontents = readfile(aux);
+    
+    String_View auxcontents = {NULL, 0};    
+    if (!sv_isempty(aux))
+        auxcontents = readfile(aux);
    
     // TODO: doctype is entangled with document format. 
     // This does not need to be the case.
@@ -152,9 +154,11 @@ FILE *tex_init(
             str_replace(&main_buffer, sv_from_string(&helper_buffer), sv("y"), doc_type);
             fprintf(tex_file, SVFMT"\n", SVARG(main_buffer));
             fprintf(tex_file, "%s\n\n", tex_packages);
-            fprintf(tex_file, "%%Appending from: " SVFMT "\n", SVARG(aux));
-            fprintf(tex_file, SVFMT, SVARG(auxcontents));
-            fprintf(tex_file, "%% Appending ends\n\n");
+            if (auxcontents.str) {
+                fprintf(tex_file, "%% Appending from: " SVFMT "\n", SVARG(aux));
+                fprintf(tex_file, SVFMT, SVARG(auxcontents));
+                fprintf(tex_file, "%% Appending ends\n\n");
+            }
         } break;
 
         case ARTICLE: { 
@@ -162,9 +166,11 @@ FILE *tex_init(
             str_replace(&main_buffer, sv_from_string(&helper_buffer), sv("y"), doc_type);
             fprintf(tex_file, SVFMT"\n", SVARG(main_buffer));
             fprintf(tex_file, "%s\n\n", tex_packages);
-            fprintf(tex_file, "%% Appending from: " SVFMT "\n", SVARG(aux));
-            fprintf(tex_file, SVFMT, SVARG(auxcontents));
-            fprintf(tex_file, "%% Appending ends\n\n");
+            if (auxcontents.str) {
+                fprintf(tex_file, "%% Appending from: " SVFMT "\n", SVARG(aux));
+                fprintf(tex_file, SVFMT, SVARG(auxcontents));
+                fprintf(tex_file, "%% Appending ends\n\n");
+            }
         } break; 
 
         default: {
