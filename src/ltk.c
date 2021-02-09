@@ -6,9 +6,12 @@
 #include "template.h"
 
 void usage(FILE *);
-void mount_tex_file(String_View);
+void mount_tex_file(String_View, String_View);
 void mount_pdf(String_View);
 char *next(int *, char ***);
+
+#define PATH_SEP '/'
+#define TEX_COMPILER "usr/bin/pdflatex"
 
 static
 Yml yml = {
@@ -24,6 +27,7 @@ int main(int argc, char **argv) {
         
         bool set_pdf = false;
         String_View inputfile;
+        String_View auxfile = {NULL, 0};
 
         if (argc == 1)
             usage(stderr);
@@ -35,6 +39,9 @@ int main(int argc, char **argv) {
                 set_pdf = true;
             } else if (strcmp(inst, "-g") == 0) {
                 dump_template(stderr);  
+            } else if (strcmp(inst, "-a") == 0) {
+                inst = next(&argc, &argv);
+                auxfile = sv(inst); 
             } else if (argc == 0) {
                 inputfile = sv(inst);
             } else {
@@ -43,34 +50,39 @@ int main(int argc, char **argv) {
             }
         }
 
-        mount_tex_file(inputfile);
+        mount_tex_file(inputfile, auxfile);
         if (set_pdf) 
             mount_pdf(inputfile);
 
+#if 0
+
+#endif
         return 0;
 }
 
 void mount_pdf(String_View input) {
     String texfile;
-    str_replace(&texfile, input, sv(".md"), sv(".tex"));
     String_View texfile_view = sv_from_string(&texfile);
-    String_View path = sv_get_char_from_right(&texfile_view, '/');
+    
+    str_replace(&texfile, input, sv(".md"), sv(".tex"));
+    String_View path = sv_get_char_from_right(&texfile_view, PATH_SEP);
+    
     if (sv_eq(path, texfile_view)) {
-        execl("/usr/bin/pdflatex", "/usr/bin/pdflatex", str_cstr(&texfile), (char *) NULL);
+        execl(TEX_COMPILER, TEX_COMPILER, str_cstr(&texfile), (char *) NULL);
     } else {
         const char *cstr_path = sv_cstr(path);
-        execl("/usr/bin/pdflatex", "/usr/bin/pdflatex", "-output-directory", cstr_path, str_cstr(&texfile), (char *) NULL);
+        execl(TEX_COMPILER, TEX_COMPILER, "-output-directory", cstr_path, str_cstr(&texfile), (char *) NULL);
         free((char *)cstr_path);
     }
 }
 
-void mount_tex_file(String_View md_file) {
+void mount_tex_file(String_View mdfile, String_View auxfile) {
 
-    String_View md_contents = readfile(md_file);
+    String_View md_contents = readfile(mdfile);
     yml_parse(&yml, &md_contents);
     
-    FILE *out  = tex_openfile(md_file);
-    tex_init(&yml, out);
+    FILE *out  = tex_openfile(mdfile);
+    tex_init(&yml, auxfile, out);
     tex_parse(sv_trim_left(md_contents), out);
     
     fclose(out);
@@ -92,9 +104,10 @@ void usage(FILE *stream) {
     const char *u = 
     "LTK - Markdown LaTeX converter\n"
     "Usage:\n"
-    "\tltk [options] [file]\n\n"
+    "\tltk [options] [file]\n"
     "Options:\n"
     "\t-g           Generates sample md file\n"
+    "\t-a           Appends auxiliary tex file in preamble\n"
     "\t--pdf        Generates tex and compiles with pdflatex pdf file\n";
     fprintf(stream, "%s\n", u);
     exit(0);
